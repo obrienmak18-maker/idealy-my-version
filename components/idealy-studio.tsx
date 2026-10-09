@@ -183,20 +183,20 @@ export function IdealyStudio() {
   const onFlowConnect = useCallback((connection: Connection) => setFlowEdges((current) => addEdge(connection, current)), [setFlowEdges]);
 
   useEffect(() => {
-    const savedTheme = window.localStorage.getItem("idealy-studio-theme");
-    if (savedTheme === "light" || savedTheme === "dark") setTheme(savedTheme);
-  }, []);
-
-  useEffect(() => {
     document.documentElement.dataset.theme = theme;
-    window.localStorage.setItem("idealy-studio-theme", theme);
   }, [theme]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        setCommandOpen((open) => !open);
+        setCommandOpen((open) => {
+          if (!open) {
+            setCommandQuery("");
+            setActiveCommandIndex(0);
+          }
+          return !open;
+        });
       }
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "j") {
         event.preventDefault();
@@ -263,11 +263,6 @@ export function IdealyStudio() {
     });
   };
 
-
-  useEffect(() => {
-    if (!commandOpen) return;
-    setActiveCommandIndex(0);
-  }, [commandOpen, commandQuery]);
 
   useEffect(() => {
     if (!commandOpen) return;
@@ -378,7 +373,7 @@ export function IdealyStudio() {
             </div>
           </div>
           <div className="topbar-actions">
-            <button className="command-trigger" type="button" onClick={() => { setCommandQuery(""); setCommandOpen(true); }}>
+            <button className="command-trigger" type="button" onClick={() => { setCommandQuery(""); setActiveCommandIndex(0); setCommandOpen(true); }}>
               <Search size={15} /><span>Rechercher</span><kbd>Ctrl K</kbd>
             </button>
             <div className="topbar-divider" />
@@ -603,7 +598,7 @@ export function IdealyStudio() {
         {commandOpen ? (
           <motion.div className="overlay-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={(event) => { if (event.target === event.currentTarget) setCommandOpen(false); }}>
             <motion.div className="command-dialog" initial={{ opacity: 0, y: -12, scale: .985 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8, scale: .985 }} transition={{ duration: .16 }} role="dialog" aria-modal="true" aria-label="Palette de commandes">
-              <div className="command-search-row"><Search size={19} /><input autoFocus placeholder="Que souhaitez-vous faire ?" value={commandQuery} onChange={(event) => setCommandQuery(event.target.value)} /><kbd>ESC</kbd><button className="mini-icon" onClick={() => setCommandOpen(false)} aria-label="Fermer" type="button"><X size={16} /></button></div>
+              <div className="command-search-row"><Search size={19} /><input autoFocus placeholder="Que souhaitez-vous faire ?" value={commandQuery} onChange={(event) => { setCommandQuery(event.target.value); setActiveCommandIndex(0); }} /><kbd>ESC</kbd><button className="mini-icon" onClick={() => setCommandOpen(false)} aria-label="Fermer" type="button"><X size={16} /></button></div>
               <div className="command-section-label">ACTIONS RAPIDES</div>
               <div className="command-results">{commands.map((cmd, index) => <button type="button" key={cmd.label} className={`command-result ${activeCommandIndex === index ? "command-result-active" : ""}`} onMouseEnter={() => setActiveCommandIndex(index)} onClick={() => { cmd.action(); setCommandOpen(false); setCommandQuery(""); }}><span className="command-result-icon"><cmd.icon size={16} /></span><span>{cmd.label}</span><small>{cmd.hint}</small><ArrowRight size={14} className="command-result-arrow" /></button>)}
                 {commands.length === 0 ? <div className="command-no-results">Aucune action trouvée pour « {commandQuery} ».</div> : null}
