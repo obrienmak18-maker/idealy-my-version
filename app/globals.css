@@ -764,3 +764,6 @@ kbd { display: inline-flex; align-items: center; justify-content: center; min-wi
   .flow-node-copy strong { font-size: 10px; }
   .flow-node-copy span { font-size: 9px; }
 }
+
+.command-result-active { background: var(--surface-hover); }
+.command-result-active .command-result-arrow { opacity: 1; }
