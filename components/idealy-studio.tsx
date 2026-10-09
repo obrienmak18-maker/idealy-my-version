@@ -176,7 +176,7 @@ export function IdealyStudio() {
   const [canvasTab, setCanvasTab] = useState<"Aperçu" | "Plan" | "Code" | "Données">("Aperçu");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showAgentPanel, setShowAgentPanel] = useState(true);
-  const [flowNodes, setFlowNodes, onFlowNodesChange] = useNodesState(initialFlowNodes);
+  const [flowNodes, , onFlowNodesChange] = useNodesState(initialFlowNodes);
   const [flowEdges, setFlowEdges, onFlowEdgesChange] = useEdgesState(initialFlowEdges);
   const onFlowConnect = useCallback((connection: Connection) => setFlowEdges((current) => addEdge(connection, current)), [setFlowEdges]);
 
