@@ -183,7 +183,13 @@ export function IdealyStudio() {
   const onFlowConnect = useCallback((connection: Connection) => setFlowEdges((current) => addEdge(connection, current)), [setFlowEdges]);
 
   useEffect(() => {
+    const savedTheme = window.localStorage.getItem("idealy-studio-theme");
+    if (savedTheme === "light" || savedTheme === "dark") setTheme(savedTheme);
+  }, []);
+
+  useEffect(() => {
     document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem("idealy-studio-theme", theme);
   }, [theme]);
 
   useEffect(() => {
