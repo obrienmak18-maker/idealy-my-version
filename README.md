@@ -21,6 +21,6 @@ pnpm dev
 
 ## Scope of this first pass
 
-This first version establishes the workspace UI and the interaction patterns for navigation, a keyboard-accessible command palette, a draggable workflow canvas, illustrated agent portraits, the real nine-item connector catalogue from Idealy, activity, notifications, themes, and the four existing plan tiers with product-configured prices. AI generation, OAuth, project persistence, notifications from the backend, and billing are not represented as live services; those interactions are explicitly marked as local prototype behavior.
+This first version establishes the workspace UI and the interaction patterns for navigation, a keyboard-accessible command palette, a draggable workflow canvas, illustrated agent portraits, a nine-item connector catalogue copied from the original app, activity, notifications, themes, four existing plan tiers with configured prices, and a fast-chat path that avoids launching agents for greetings and ordinary questions. AI generation, OAuth, project persistence, notifications from the backend, and billing are not represented as live services; those interactions are explicitly marked as local prototype behavior.
 
 The welcome, registration, and initial profile-information flows remain outside this repo's scope so they can later be retained from the original project as requested.
