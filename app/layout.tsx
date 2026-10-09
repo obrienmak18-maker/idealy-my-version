@@ -5,10 +5,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Idealy Studio — Build with intention",
+    default: "Idealy Studio — Donnez forme à vos idées",
     template: "%s · Idealy Studio",
   },
-  description: "Un espace de création assistée : idées, canvas, agents et connecteurs réunis dans un workspace.",
+  description: "Un espace de création assistée : idées, canvas, agents et connecteurs, réunis dans un espace de travail.",
   applicationName: "Idealy",
   icons: { icon: "/favicon.svg" },
 };
