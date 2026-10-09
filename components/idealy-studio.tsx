@@ -645,7 +645,7 @@ export function IdealyStudio() {
                             {numeric ? (
                               <>
                                 <div className="price-line"><strong>{billingCycle === "yearly" && plan.key !== "free" ? `${monthlyEquivalent.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €` : `${value.toLocaleString("fr-FR")} €`}</strong><span>/ mois</span></div>
-                                {plan.key === "free" ? <span className="price-billing-note">Gratuit, sans engagement</span> : billingCycle === "yearly" ? <span className="price-billing-note">Soit {(value as number).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} € facturés par an</span> : <span className="price-billing-note">Facturation mensuelle</span>}
+                                {plan.key === "free" ? <span className="price-billing-note">Offre gratuite</span> : billingCycle === "yearly" ? <span className="price-billing-note">Soit {(value as number).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} € facturés par an</span> : <span className="price-billing-note">Facturation mensuelle</span>}
                               </>
                             ) : <><div className="price-line"><strong>Sur devis</strong></div><span className="price-billing-note">Conditions à définir avec l’équipe</span></>}
                           </div>
