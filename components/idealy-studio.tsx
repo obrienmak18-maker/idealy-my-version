@@ -166,6 +166,7 @@ export function IdealyStudio() {
   const [projectPrompt, setProjectPrompt] = useState("");
   const [projectTitle, setProjectTitle] = useState("Mon prochain projet");
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [connectorQuery, setConnectorQuery] = useState("");
   const [connectorCategory, setConnectorCategory] = useState("Tous");
   const [selectedConnector, setSelectedConnector] = useState<Connector | null>(null);
@@ -506,19 +507,79 @@ export function IdealyStudio() {
 
               {view === "pricing" ? (
                 <div className="standard-page pricing-page">
-                  <SectionHeading eyebrow="OFFRES IDEALY" title="Un espace qui grandit avec vos projets." description="Les noms d’offres existants sont conservés. Les tarifs, limites et règles de facturation seront repris depuis la configuration actuelle avant toute activation." />
-                  <div className="pricing-note"><LockKeyhole size={16} /><span><strong>Aucun paiement actif.</strong> Cette page est une structure d’interface ; elle ne collecte pas de paiement et ne crée aucun abonnement.</span></div>
+                  <SectionHeading
+                    eyebrow="OFFRES IDEALY"
+                    title="Un espace qui grandit avec vos projets."
+                    description="Les offres et tarifs proviennent de la configuration produit existante. Choisissez une période pour comparer les tarifs affichés."
+                  />
+                  <div className="pricing-note">
+                    <LockKeyhole size={16} />
+                    <span><strong>Aucun paiement actif dans cette version.</strong> Les offres et tarifs sont affichés à titre informatif. Aucun checkout, abonnement ou changement de forfait ne sera lancé depuis cette interface.</span>
+                  </div>
+                  <div className="billing-switch-row">
+                    <div className="billing-switch" aria-label="Période de facturation">
+                      <button type="button" onClick={() => setBillingCycle("monthly")} className={billingCycle === "monthly" ? "billing-switch-active" : ""} aria-pressed={billingCycle === "monthly"}>Mensuel</button>
+                      <button type="button" onClick={() => setBillingCycle("yearly")} className={billingCycle === "yearly" ? "billing-switch-active" : ""} aria-pressed={billingCycle === "yearly"}>Annuel <span>2 mois offerts</span></button>
+                    </div>
+                    <span className="billing-switch-caption">{billingCycle === "yearly" ? "Facturation annuelle en une fois" : "Facturation au mois"}</span>
+                  </div>
                   <div className="pricing-grid">
                     {[
-                      { name: "Découverte", key: "free", text: "Pour explorer Idealy et commencer à structurer ses idées.", icon: Compass, tint: "green", features: ["Découverte du workspace", "Canvas de projet", "Catalogue de connecteurs"], action: "Offre de départ" },
-                      { name: "Pro", key: "pro", text: "Pour faire avancer des projets plus ambitieux.", icon: Zap, tint: "violet", features: ["Flux de travail avancés", "Collaboration avec les agents", "Outils de projet étendus"], action: "Voir l’offre" },
-                      { name: "Business", key: "business", text: "Pour organiser le travail d’une équipe.", icon: Blocks, tint: "blue", features: ["Espace d’équipe", "Gouvernance et contrôle", "Connecteurs d’organisation"], action: "Voir l’offre" },
-                    ].map((plan, index) => <motion.article className={`pricing-card ${index === 1 ? "pricing-card-featured" : ""}`} key={plan.key} initial={{ opacity: 0, y: 9 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * .06 }}><div className="pricing-card-top"><WorkspaceIcon icon={plan.icon} tint={plan.tint} />{index === 1 ? <span className="popular-plan-label">Pour avancer</span> : null}</div><h2>{plan.name}</h2><p>{plan.text}</p><div className="price-placeholder"><strong>À confirmer</strong><span>Tarif actuel à synchroniser</span></div><div className="pricing-divider" /><ul>{plan.features.map((feature) => <li key={feature}><Check size={15} />{feature}</li>)}</ul><button className={index === 1 ? "primary-button full-width" : "outline-button full-width"} onClick={() => toast("Offres en préparation", { description: "Le tarif, les limites exactes et le parcours d’abonnement doivent venir de la configuration existante." })} type="button">{plan.action} <ArrowRight size={14} /></button></motion.article>)}
+                      {
+                        name: "Découverte (Genin)", key: "free", text: "Explorez Idealy, concevez vos premières idées et découvrez l’escouade multi-agents.",
+                        icon: Compass, tint: "green", monthly: 0, annual: 0, points: "200 Power Points / mois", cap: "Plafond du portefeuille : 250 Power Points",
+                        features: ["Jusqu’à 3 projets", "1 mission active", "Accès aux 4 Voies et orchestration multi-agents", "VFS et export ZIP du projet", "Aperçu temps réel du code généré"],
+                        action: "Offre Découverte",
+                      },
+                      {
+                        name: "Professionnel (Pro)", key: "pro", text: "Pour les créateurs, freelances et développeurs qui construisent des applications réelles.",
+                        icon: Zap, tint: "violet", monthly: 19, annual: 190.8, points: "2 500 Power Points / mois", cap: "Plafond du portefeuille : 3 500 Power Points",
+                        features: ["Projets illimités", "Jusqu’à 5 missions actives", "Intégration GitHub OAuth et synchronisation des branches", "VFS jusqu’à 300 fichiers par mission", "Modèles IA avancés", "Support prioritaire"],
+                        action: "Voir les détails",
+                      },
+                      {
+                        name: "Business (Team)", key: "business", text: "Pour les startups, agences et équipes qui ont besoin d’une capacité de génération soutenue.",
+                        icon: Blocks, tint: "blue", monthly: 49, annual: 490.8, points: "4 000 Power Points / mois", cap: "Plafond du portefeuille : 7 000 Power Points",
+                        features: ["Projets illimités", "Jusqu’à 20 missions actives", "VFS jusqu’à 1 000 fichiers par mission", "Accès anticipé aux connecteurs MCP et aux intégrations cloud", "Boucle d’auto-correction Reviewer en 3 passes", "SLA annoncé à 99,9 % et support direct ingénierie"],
+                        action: "Voir les détails",
+                      },
+                      {
+                        name: "Enterprise", key: "enterprise", text: "Pour les organisations qui ont besoin de quotas, de gouvernance et d’un accompagnement sur mesure.",
+                        icon: ShieldCheck, tint: "amber", monthly: null, annual: null, points: null, cap: null,
+                        features: ["Quotas et espaces sur mesure", "Gouvernance et sécurité", "Conditions et accompagnement sur mesure"],
+                        action: "Offre sur mesure",
+                      },
+                    ].map((plan, index) => {
+                      const value = billingCycle === "yearly" ? plan.annual : plan.monthly;
+                      const numeric = typeof value === "number";
+                      const monthlyEquivalent = plan.key === "pro" ? 15.9 : plan.key === "business" ? 40.9 : value;
+                      return (
+                        <motion.article className={`pricing-card ${index === 1 ? "pricing-card-featured" : ""}`} key={plan.key} initial={{ opacity: 0, y: 9 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * .05 }}>
+                          <div className="pricing-card-top">
+                            <WorkspaceIcon icon={plan.icon} tint={plan.tint} />
+                            {index === 1 ? <span className="popular-plan-label">Le plus choisi</span> : index === 2 ? <span className="popular-plan-label business-plan-label">Haute capacité</span> : null}
+                          </div>
+                          <h2>{plan.name}</h2>
+                          <p>{plan.text}</p>
+                          <div className="price-display">
+                            {numeric ? (
+                              <>
+                                <div className="price-line"><strong>{billingCycle === "yearly" && plan.key !== "free" ? `${monthlyEquivalent.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €` : `${value.toLocaleString("fr-FR")} €`}</strong><span>/ mois</span></div>
+                                {plan.key === "free" ? <span className="price-billing-note">Gratuit, sans engagement</span> : billingCycle === "yearly" ? <span className="price-billing-note">Soit {(value as number).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} € facturés par an</span> : <span className="price-billing-note">Facturation mensuelle</span>}
+                              </>
+                            ) : <><div className="price-line"><strong>Sur devis</strong></div><span className="price-billing-note">Conditions à définir avec l’équipe</span></>}
+                          </div>
+                          {plan.points ? <div className="power-allocation"><span className="power-allocation-icon"><Zap size={14} /></span><span><strong>{plan.points}</strong><small>{plan.cap}</small></span></div> : <div className="power-allocation power-allocation-custom"><span className="power-allocation-icon"><Settings2 size={14} /></span><span><strong>Capacité personnalisée</strong><small>Montant à définir</small></span></div>}
+                          <div className="pricing-divider" />
+                          <ul>{plan.features.map((feature) => <li key={feature}><Check size={15} />{feature}</li>)}</ul>
+                          <button className={index === 1 ? "primary-button full-width" : "outline-button full-width"} onClick={() => toast("Paiement désactivé", { description: "Cette maquette n’ouvre pas de checkout et ne modifie aucun abonnement. Les tarifs visibles proviennent de la configuration produit d’Idealy." })} type="button">{plan.action} <ArrowRight size={14} /></button>
+                        </motion.article>
+                      );
+                    })}
                   </div>
-                  <p className="pricing-footnote">Les fonctionnalités affichées ici sont des catégories de présentation, pas une promesse de disponibilité. Les détails exacts seront validés avant la mise en ligne.</p>
+                  <p className="pricing-footnote">Source produit actuelle : Découverte 0 € et 200 Power Points/mois ; Pro 19 €/mois ou 190,80 €/an ; Business 49 €/mois ou 490,80 €/an ; Enterprise sur mesure. Cette page n’active aucun paiement.</p>
                 </div>
               ) : null}
-
               {view === "settings" ? (
                 <div className="standard-page settings-page">
                   <SectionHeading eyebrow="PRÉFÉRENCES" title="Un workspace à votre façon." description="Les préférences visuelles sont interactives dans cette maquette. Les préférences de compte seront sauvegardées après raccordement." />
