@@ -6,12 +6,12 @@ import {
   Compass, CreditCard, Database, FileText, Filter,
   GitBranch, Globe, History, Keyboard, Layers, LayoutDashboard, ListTodo, MessageCircle,
   LockKeyhole, Menu, Moon, MoreHorizontal, PanelLeftClose, PanelLeftOpen,
-  Plus, Search, Settings2, ShieldCheck, Sparkles, Sun, WandSparkles, Workflow,
+  Plus, Palette, Search, Settings2, ShieldCheck, Sparkles, Sun, WandSparkles, Workflow,
   X, Zap, Eye, SlidersHorizontal, Play, RefreshCw, ArrowUp, Paperclip,
   type LucideIcon,
 } from "lucide-react";
 import {
-  siCanva, siFigma, siGithub, siNotion, siSlack, siStripe, siSupabase, siVercel,
+  siFigma, siGithub, siNotion, siStripe, siSupabase, siVercel,
 } from "simple-icons";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState, useRef, type ReactNode } from "react";
@@ -63,14 +63,14 @@ const connectorCategoryLabels: Record<ConnectorCategory, string> = {
 };
 
 const connectors: Connector[] = [
-  { id: "canva", name: "Canva", description: "Importer, transformer et exporter des designs sélectionnés par l’utilisateur.", category: "design", brand: siCanva, availability: "planned", auth: "OAuth 2.0", operations: ["Lister les designs autorisés", "Lire un design sélectionné", "Créer un design", "Exporter un design"] },
+  { id: "canva", name: "Canva", description: "Importer, transformer et exporter des designs sélectionnés par l’utilisateur.", category: "design", brand: { title: "Canva", hex: "00C4CC", path: "" }, availability: "planned", auth: "OAuth 2.0", operations: ["Lister les designs autorisés", "Lire un design sélectionné", "Créer un design", "Exporter un design"] },
   { id: "github", name: "GitHub", description: "Lire un dépôt sélectionné et publier du code ou des issues après confirmation.", category: "code", brand: siGithub, availability: "configured", auth: "OAuth 2.0", operations: ["Lister les dépôts autorisés", "Lire un dépôt sélectionné", "Créer une branche", "Ouvrir une pull request"] },
   { id: "google-drive", name: "Google Drive", description: "Lister les fichiers Drive explicitement autorisés par le compte Google connecté.", category: "data", brand: { title: "Google Drive", hex: "4285F4", path: "" }, availability: "planned", auth: "OAuth 2.0", operations: ["Lister les fichiers autorisés", "Lire les métadonnées d’un fichier sélectionné"] },
   { id: "vercel", name: "Vercel", description: "Créer des previews et déclencher un déploiement après validation de l’utilisateur.", category: "deploy", brand: siVercel, availability: "planned", auth: "OAuth 2.0", operations: ["Lister les projets Vercel", "Lire le statut d’un déploiement", "Créer une preview", "Déployer en production"] },
   { id: "supabase", name: "Supabase", description: "Lire les ressources du projet Idealy et gérer les données selon les policies RLS.", category: "data", brand: siSupabase, availability: "configured", auth: "Géré par Idealy", operations: ["Lire une mission de l’utilisateur", "Lire les fichiers d’une mission", "Ajouter un événement de mission"] },
   { id: "figma", name: "Figma", description: "Lire des fichiers de design sélectionnés et récupérer leurs métadonnées ou assets.", category: "design", brand: siFigma, availability: "planned", auth: "OAuth 2.0", operations: ["Lire un fichier sélectionné", "Exporter les assets sélectionnés"] },
   { id: "notion", name: "Notion", description: "Lire ou écrire des pages et bases explicitement partagées avec l’intégration.", category: "data", brand: siNotion, availability: "planned", auth: "OAuth 2.0", operations: ["Rechercher les pages partagées", "Lire une page sélectionnée", "Ajouter du contenu à une page"] },
-  { id: "slack", name: "Slack", description: "Lire un contexte autorisé et envoyer des messages uniquement après confirmation.", category: "communication", brand: siSlack, availability: "planned", auth: "OAuth 2.0", operations: ["Lister les canaux autorisés", "Envoyer un message après confirmation"] },
+  { id: "slack", name: "Slack", description: "Lire un contexte autorisé et envoyer des messages uniquement après confirmation.", category: "communication", brand: { title: "Slack", hex: "4A154B", path: "" }, availability: "planned", auth: "OAuth 2.0", operations: ["Lister les canaux autorisés", "Envoyer un message après confirmation"] },
   { id: "stripe", name: "Stripe", description: "Lire l’état de facturation Idealy sans exposer de données sensibles au navigateur.", category: "billing", brand: siStripe, availability: "configured", auth: "Géré par Idealy", operations: ["Lire l’abonnement courant", "Lire une facture"] },
 ];
 
@@ -193,6 +193,8 @@ function BrandMark({ size = 22 }: { size?: number }) {
 }
 
 function BrandIcon({ brand, size = 23 }: { brand: SimpleBrand; size?: number }) {
+  if (brand.title === "Canva") return <Palette aria-label={brand.title} role="img" size={size} strokeWidth={1.8} />;
+  if (brand.title === "Slack") return <MessageCircle aria-label={brand.title} role="img" size={size} strokeWidth={1.8} />;
   if (brand.title === "Google Drive") {
     return (
       <svg aria-label={brand.title} role="img" width={size} height={size} viewBox="0 0 24 24" fill="none">
@@ -623,10 +625,10 @@ export function IdealyStudio() {
               {view === "connectors" ? (
                 <div className="standard-page">
                   <SectionHeading eyebrow="ÉCOSYSTÈME" title="Tout votre espace, connecté." description="Choisissez les services qui aideront Idealy à travailler avec vos outils existants." action={<button className="outline-button" onClick={() => toast("Catalogue actualisé", { description: "Le catalogue local contient les services inclus dans cette maquette." })} type="button"><RefreshCw size={15} /> Actualiser</button>} />
-                  <div className="connectors-summary"><div className="connector-summary-icon"><GitBranch size={20} /></div><div><strong>Vos outils, au même endroit.</strong><span>Les marques sont affichées avec leurs logos. Aucune connexion externe n’est active dans cette version.</span></div><div className="connector-summary-count"><strong>{connectors.length}</strong><span>services listés</span></div></div>
+                  <div className="connectors-summary"><div className="connector-summary-icon"><GitBranch size={20} /></div><div><strong>Vos outils, au même endroit.</strong><span>Chaque service est identifié par son icône. Aucune connexion externe n’est active dans cette version.</span></div><div className="connector-summary-count"><strong>{connectors.length}</strong><span>services listés</span></div></div>
                   <div className="connector-controls"><label className="connector-search"><Search size={16} /><input ref={connectorSearchRef} value={connectorQuery} onChange={(event) => setConnectorQuery(event.target.value)} placeholder="Rechercher un connecteur…" aria-label="Rechercher un connecteur" /><kbd>/</kbd></label><div className="filter-group"><Filter size={14} />{[{ key: "all", label: "Tous" }, ...Object.entries(connectorCategoryLabels).map(([key, label]) => ({ key, label }))].map((cat) => <button key={cat.key} onClick={() => setConnectorCategory(cat.key as ConnectorCategory | "all")} type="button" className={connectorCategory === cat.key ? "filter-chip active" : "filter-chip"}>{cat.label}</button>)}</div></div>
                   <div className="connectors-grid">{filteredConnectors.map((connector, index) => <motion.article className="connector-card" key={connector.name} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * .025 }}><div className="connector-card-top"><div className="connector-brand" style={{ color: `#${connector.brand.hex}` }}><BrandIcon brand={connector.brand} size={25} /></div><div className="connector-card-heading"><strong>{connector.name}</strong><span>{connectorCategoryLabels[connector.category]}</span></div><span className={connector.availability === "configured" ? "catalog-status catalog-status-configured" : "catalog-status"}>{connector.availability === "configured" ? "Configuré à l’origine" : "Planifié"}</span></div><p>{connector.description}</p><div className="connector-card-bottom"><span className={configuredConnectors.includes(connector.name) ? "connector-ready" : "connector-available"}><i />{configuredConnectors.includes(connector.name) ? "Préparé localement" : connector.availability === "configured" ? "Configuré dans l’original" : "Prévu au catalogue"}</span><button className="connector-action" onClick={() => setSelectedConnector(connector)} type="button">{configuredConnectors.includes(connector.name) ? "Voir la fiche" : "Détails"} <ArrowUpRight size={13} /></button></div></motion.article>)}</div>
-                  {filteredConnectors.length === 0 ? <div className="no-results"><Search size={22} /><strong>Aucun connecteur trouvé</strong><span>Essayez un autre nom ou changez de catégorie.</span><button className="text-action" onClick={() => { setConnectorQuery(""); setConnectorCategory("Tous"); }} type="button">Effacer les filtres</button></div> : null}
+                  {filteredConnectors.length === 0 ? <div className="no-results"><Search size={22} /><strong>Aucun connecteur trouvé</strong><span>Essayez un autre nom ou changez de catégorie.</span><button className="text-action" onClick={() => { setConnectorQuery(""); setConnectorCategory("all"); }} type="button">Effacer les filtres</button></div> : null}
                   <div className="connector-bottom-note"><LockKeyhole size={14} /> Les autorisations OAuth et les clés d’accès seront ajoutées côté serveur. Aucun secret ne doit être placé dans le navigateur.</div>
                 </div>
               ) : null}
