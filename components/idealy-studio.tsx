@@ -327,7 +327,7 @@ export function IdealyStudio() {
           {sidebarOpen ? <div className="nav-section-label nav-section-second">VOTRE ESPACE</div> : null}
           <nav className="nav-group" aria-label="Gestion de l’espace">
             {navItems.filter((item) => item.group === "manage").map((item) => (
-              <NavButton key={item.id} active={view === item.id} icon={item.icon} label={sidebarOpen ? item.label : ""} onClick={() => navigate(item.id)} badge={item.id === "connectors" ? (sidebarOpen ? "11" : undefined) : undefined} />
+              <NavButton key={item.id} active={view === item.id} icon={item.icon} label={item.label} collapsed={!sidebarOpen} onClick={() => navigate(item.id)} badge={item.id === "connectors" ? (sidebarOpen ? "11" : undefined) : undefined} />
             ))}
           </nav>
 
@@ -363,7 +363,7 @@ export function IdealyStudio() {
       <main className="main-shell">
         <header className="topbar">
           <div className="topbar-left">
-            <button className="icon-button mobile-menu-trigger" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} type="button" aria-label="Ouvrir la navigation"><Menu size={18} /></button>
+            <button className="icon-button mobile-menu-trigger" onClick={() => { setSidebarOpen(true); setMobileMenuOpen(!mobileMenuOpen); }} type="button" aria-label="Ouvrir la navigation"><Menu size={18} /></button>
             <div className="breadcrumb">
               <span className="breadcrumb-root">Idealy</span><ChevronRight size={13} />
               <span>{navItems.find((item) => item.id === view)?.label ?? "Studio"}</span>
