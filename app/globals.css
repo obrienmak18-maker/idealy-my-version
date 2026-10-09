@@ -854,3 +854,24 @@ kbd { display: inline-flex; align-items: center; justify-content: center; min-wi
 @media (min-width: 721px) and (max-width: 900px) {
   .filter-group { flex-wrap: wrap; }
 }
+
+
+.fast-chat-preview { max-width: 770px; margin: 15px auto 0; overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow-sm); }
+.fast-chat-header { display: flex; align-items: center; gap: 10px; padding: 12px 13px; background: var(--surface-soft); border-bottom: 1px solid var(--line); }
+.fast-chat-symbol { display: grid; place-items: center; width: 32px; height: 32px; flex: 0 0 32px; border-radius: 10px; background: var(--green-soft); color: var(--green); }
+.fast-chat-header > div { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+.fast-chat-header strong { color: var(--text); font-size: 10px; font-weight: 700; }
+.fast-chat-header .eyebrow { font-size: 8px; }
+.fast-chat-turn { display: flex; align-items: flex-start; gap: 9px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.fast-chat-turn:last-child { border-bottom: 0; }
+.fast-chat-speaker { display: inline-flex; flex: 0 0 auto; align-items: center; height: 22px; padding: 0 7px; border-radius: 6px; background: var(--surface-muted); color: var(--muted-strong); font-size: 9px; font-weight: 700; }
+.fast-chat-turn p { color: var(--text); font-size: 11px; line-height: 1.6; margin: 1px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.fast-chat-assistant { background: color-mix(in srgb, var(--green-soft) 22%, var(--surface)); }
+.fast-chat-avatar { display: grid; place-items: center; width: 25px; height: 25px; flex: 0 0 25px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.fast-chat-assistant > div { min-width: 0; }
+.fast-chat-assistant small { display: block; margin-top: 7px; color: var(--muted); font-size: 8px; }
+@media (max-width: 720px) {
+  .fast-chat-preview { margin-top: 12px; }
+  .fast-chat-header { padding: 10px; }
+  .fast-chat-turn { padding: 11px 10px; }
+}
