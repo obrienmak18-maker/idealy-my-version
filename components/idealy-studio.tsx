@@ -11,8 +11,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import {
-  siCanva, siDiscord, siFigma, siGithub, siGoogle, siNotion, siOpenai,
-  siSlack, siStripe, siSupabase, siVercel,
+  siCanva, siFigma, siGithub, siNotion, siSlack, siStripe, siSupabase, siVercel,
 } from "simple-icons";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState, useRef, type ReactNode } from "react";
@@ -22,20 +21,37 @@ import { Toaster, toast } from "sonner";
 
 type View = "studio" | "canvas" | "agents" | "connectors" | "activity" | "pricing" | "settings";
 type SimpleBrand = { title: string; hex: string; path: string };
-type Connector = { name: string; description: string; category: "Build" | "Design" | "Data" | "Team"; brand: SimpleBrand; popular?: boolean };
+type ConnectorCategory = "code" | "deploy" | "data" | "billing" | "design" | "communication";
+type Connector = {
+  id: string;
+  name: string;
+  description: string;
+  category: ConnectorCategory;
+  brand: SimpleBrand;
+  availability: "configured" | "planned";
+  auth: "OAuth 2.0" | "Géré par Idealy";
+  operations: string[];
+};
+
+const connectorCategoryLabels: Record<ConnectorCategory, string> = {
+  code: "Code & Git",
+  deploy: "Déploiement",
+  data: "Données & Cloud",
+  billing: "Paiements",
+  design: "Design & médias",
+  communication: "Communication",
+};
 
 const connectors: Connector[] = [
-  { name: "GitHub", description: "Dépôts, branches et revues de code.", category: "Build", brand: siGithub, popular: true },
-  { name: "Supabase", description: "Base de données, authentification et fichiers.", category: "Data", brand: siSupabase, popular: true },
-  { name: "Vercel", description: "Aperçus et déploiements de votre application.", category: "Build", brand: siVercel, popular: true },
-  { name: "Figma", description: "Maquettes, composants et design system.", category: "Design", brand: siFigma, popular: true },
-  { name: "Canva", description: "Visuels, présentations et contenus de marque.", category: "Design", brand: siCanva },
-  { name: "Stripe", description: "Paiements et gestion des abonnements.", category: "Data", brand: siStripe },
-  { name: "Notion", description: "Notes, spécifications et documentation.", category: "Team", brand: siNotion },
-  { name: "Slack", description: "Notifications et conversations d’équipe.", category: "Team", brand: siSlack },
-  { name: "Google", description: "Services et fichiers Google Workspace.", category: "Team", brand: siGoogle },
-  { name: "OpenAI", description: "Fournisseurs de modèles et outils IA.", category: "Build", brand: siOpenai },
-  { name: "Discord", description: "Communauté et alertes de projet.", category: "Team", brand: siDiscord },
+  { id: "canva", name: "Canva", description: "Importer, transformer et exporter des designs sélectionnés par l’utilisateur.", category: "design", brand: siCanva, availability: "planned", auth: "OAuth 2.0", operations: ["Lister les designs autorisés", "Lire un design sélectionné", "Créer un design", "Exporter un design"] },
+  { id: "github", name: "GitHub", description: "Lire un dépôt sélectionné et publier du code ou des issues après confirmation.", category: "code", brand: siGithub, availability: "configured", auth: "OAuth 2.0", operations: ["Lister les dépôts autorisés", "Lire un dépôt sélectionné", "Créer une branche", "Ouvrir une pull request"] },
+  { id: "google-drive", name: "Google Drive", description: "Lister les fichiers Drive explicitement autorisés par le compte Google connecté.", category: "data", brand: { title: "Google Drive", hex: "4285F4", path: "" }, availability: "planned", auth: "OAuth 2.0", operations: ["Lister les fichiers autorisés", "Lire les métadonnées d’un fichier sélectionné"] },
+  { id: "vercel", name: "Vercel", description: "Créer des previews et déclencher un déploiement après validation de l’utilisateur.", category: "deploy", brand: siVercel, availability: "planned", auth: "OAuth 2.0", operations: ["Lister les projets Vercel", "Lire le statut d’un déploiement", "Créer une preview", "Déployer en production"] },
+  { id: "supabase", name: "Supabase", description: "Lire les ressources du projet Idealy et gérer les données selon les policies RLS.", category: "data", brand: siSupabase, availability: "configured", auth: "Géré par Idealy", operations: ["Lire une mission de l’utilisateur", "Lire les fichiers d’une mission", "Ajouter un événement de mission"] },
+  { id: "figma", name: "Figma", description: "Lire des fichiers de design sélectionnés et récupérer leurs métadonnées ou assets.", category: "design", brand: siFigma, availability: "planned", auth: "OAuth 2.0", operations: ["Lire un fichier sélectionné", "Exporter les assets sélectionnés"] },
+  { id: "notion", name: "Notion", description: "Lire ou écrire des pages et bases explicitement partagées avec l’intégration.", category: "data", brand: siNotion, availability: "planned", auth: "OAuth 2.0", operations: ["Rechercher les pages partagées", "Lire une page sélectionnée", "Ajouter du contenu à une page"] },
+  { id: "slack", name: "Slack", description: "Lire un contexte autorisé et envoyer des messages uniquement après confirmation.", category: "communication", brand: siSlack, availability: "planned", auth: "OAuth 2.0", operations: ["Lister les canaux autorisés", "Envoyer un message après confirmation"] },
+  { id: "stripe", name: "Stripe", description: "Lire l’état de facturation Idealy sans exposer de données sensibles au navigateur.", category: "billing", brand: siStripe, availability: "configured", auth: "Géré par Idealy", operations: ["Lire l’abonnement courant", "Lire une facture"] },
 ];
 
 const navItems: { id: View; label: string; icon: LucideIcon; group: "create" | "manage" }[] = [
@@ -59,7 +75,7 @@ const agents = [
 const activityItems = [
   { title: "Workspace initialisé", detail: "Structure de projet préparée localement", time: "À l’instant", icon: Layers, tint: "violet" },
   { title: "Palette de commandes disponible", detail: "Utilisez Ctrl K pour accéder rapidement aux actions", time: "Récemment", icon: Command, tint: "blue" },
-  { title: "Connecteurs catalogués", detail: "11 services affichés, sans connexion externe active", time: "Récemment", icon: GitBranch, tint: "green" },
+  { title: "Catalogue de connecteurs importé", detail: "9 services repris du catalogue Idealy d’origine", time: "Récemment", icon: GitBranch, tint: "green" },
 ];
 
 type AgentLook = {
@@ -213,7 +229,7 @@ export function IdealyStudio() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [connectorQuery, setConnectorQuery] = useState("");
   const connectorSearchRef = useRef<HTMLInputElement>(null);
-  const [connectorCategory, setConnectorCategory] = useState("Tous");
+  const [connectorCategory, setConnectorCategory] = useState<ConnectorCategory | "all">("all");
   const [selectedConnector, setSelectedConnector] = useState<Connector | null>(null);
   const [configuredConnectors, setConfiguredConnectors] = useState<string[]>([]);
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -269,7 +285,7 @@ export function IdealyStudio() {
 
   const filteredConnectors = useMemo(() => connectors.filter((item) => {
     const matchesQuery = `${item.name} ${item.description}`.toLowerCase().includes(connectorQuery.toLowerCase());
-    const matchesCategory = connectorCategory === "Tous" || item.category === connectorCategory;
+    const matchesCategory = connectorCategory === "all" || item.category === connectorCategory;
     return matchesQuery && matchesCategory;
   }), [connectorQuery, connectorCategory]);
 
@@ -544,9 +560,9 @@ export function IdealyStudio() {
               {view === "connectors" ? (
                 <div className="standard-page">
                   <SectionHeading eyebrow="ÉCOSYSTÈME" title="Tout votre espace, connecté." description="Choisissez les services qui aideront Idealy à travailler avec vos outils existants." action={<button className="outline-button" onClick={() => toast("Catalogue actualisé", { description: "Le catalogue local contient les services inclus dans cette maquette." })} type="button"><RefreshCw size={15} /> Actualiser</button>} />
-                  <div className="connectors-summary"><div className="connector-summary-icon"><GitBranch size={20} /></div><div><strong>Vos outils, au même endroit.</strong><span>Les marques sont affichées avec leurs logos. Aucune connexion externe n’est active dans cette version.</span></div><div className="connector-summary-count"><strong>11</strong><span>services listés</span></div></div>
-                  <div className="connector-controls"><label className="connector-search"><Search size={16} /><input ref={connectorSearchRef} value={connectorQuery} onChange={(event) => setConnectorQuery(event.target.value)} placeholder="Rechercher un connecteur…" aria-label="Rechercher un connecteur" /><kbd>/</kbd></label><div className="filter-group"><Filter size={14} />{["Tous", "Build", "Design", "Data", "Team"].map((cat) => <button key={cat} onClick={() => setConnectorCategory(cat)} type="button" className={connectorCategory === cat ? "filter-chip active" : "filter-chip"}>{cat}</button>)}</div></div>
-                  <div className="connectors-grid">{filteredConnectors.map((connector, index) => <motion.article className="connector-card" key={connector.name} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * .025 }}><div className="connector-card-top"><div className="connector-brand" style={{ color: `#${connector.brand.hex}` }}><BrandIcon brand={connector.brand} size={25} /></div><div className="connector-card-heading"><strong>{connector.name}</strong><span>{connector.category}</span></div>{connector.popular ? <span className="popular-dot" title="Connecteur populaire" /> : null}</div><p>{connector.description}</p><div className="connector-card-bottom"><span className={configuredConnectors.includes(connector.name) ? "connector-ready" : "connector-available"}><i />{configuredConnectors.includes(connector.name) ? "Prêt à configurer" : "Disponible"}</span><button className="connector-action" onClick={() => setSelectedConnector(connector)} type="button">{configuredConnectors.includes(connector.name) ? "Gérer" : "Configurer"} <ArrowUpRight size={13} /></button></div></motion.article>)}</div>
+                  <div className="connectors-summary"><div className="connector-summary-icon"><GitBranch size={20} /></div><div><strong>Vos outils, au même endroit.</strong><span>Les marques sont affichées avec leurs logos. Aucune connexion externe n’est active dans cette version.</span></div><div className="connector-summary-count"><strong>{connectors.length}</strong><span>services listés</span></div></div>
+                  <div className="connector-controls"><label className="connector-search"><Search size={16} /><input ref={connectorSearchRef} value={connectorQuery} onChange={(event) => setConnectorQuery(event.target.value)} placeholder="Rechercher un connecteur…" aria-label="Rechercher un connecteur" /><kbd>/</kbd></label><div className="filter-group"><Filter size={14} />{[{ key: "all", label: "Tous" }, ...Object.entries(connectorCategoryLabels).map(([key, label]) => ({ key, label }))].map((cat) => <button key={cat.key} onClick={() => setConnectorCategory(cat.key as ConnectorCategory | "all")} type="button" className={connectorCategory === cat.key ? "filter-chip active" : "filter-chip"}>{cat.label}</button>)}</div></div>
+                  <div className="connectors-grid">{filteredConnectors.map((connector, index) => <motion.article className="connector-card" key={connector.name} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * .025 }}><div className="connector-card-top"><div className="connector-brand" style={{ color: `#${connector.brand.hex}` }}><BrandIcon brand={connector.brand} size={25} /></div><div className="connector-card-heading"><strong>{connector.name}</strong><span>{connectorCategoryLabels[connector.category]}</span></div><span className={connector.availability === "configured" ? "catalog-status catalog-status-configured" : "catalog-status"}>{connector.availability === "configured" ? "Configuré à l’origine" : "Planifié"}</span></div><p>{connector.description}</p><div className="connector-card-bottom"><span className={configuredConnectors.includes(connector.name) ? "connector-ready" : "connector-available"}><i />{configuredConnectors.includes(connector.name) ? "Préparé localement" : connector.availability === "configured" ? "Présent dans Idealy" : "Prévu au catalogue"}</span><button className="connector-action" onClick={() => setSelectedConnector(connector)} type="button">{configuredConnectors.includes(connector.name) ? "Voir la fiche" : "Détails"} <ArrowUpRight size={13} /></button></div></motion.article>)}</div>
                   {filteredConnectors.length === 0 ? <div className="no-results"><Search size={22} /><strong>Aucun connecteur trouvé</strong><span>Essayez un autre nom ou changez de catégorie.</span><button className="text-action" onClick={() => { setConnectorQuery(""); setConnectorCategory("Tous"); }} type="button">Effacer les filtres</button></div> : null}
                   <div className="connector-bottom-note"><LockKeyhole size={14} /> Les autorisations OAuth et les clés d’accès seront ajoutées côté serveur. Aucun secret ne doit être placé dans le navigateur.</div>
                 </div>
@@ -668,11 +684,11 @@ export function IdealyStudio() {
             <motion.div className="connector-dialog" role="dialog" aria-modal="true" aria-labelledby="connector-dialog-title" initial={{ opacity: 0, y: 18, scale: .985 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: .985 }} transition={{ duration: .18 }}>
               <button className="dialog-close icon-button" onClick={() => setSelectedConnector(null)} type="button" aria-label="Fermer"><X size={17} /></button>
               <div className="connector-dialog-brand" style={{ color: `#${selectedConnector.brand.hex}` }}><BrandIcon brand={selectedConnector.brand} size={34} /></div>
-              <span className="eyebrow">CONNECTEUR / {selectedConnector.category.toUpperCase()}</span>
+              <span className="eyebrow">CONNECTEUR / {connectorCategoryLabels[selectedConnector.category].toUpperCase()}</span>
               <h2 id="connector-dialog-title">Configurer {selectedConnector.name}</h2>
-              <p>{selectedConnector.description} L’autorisation et les secrets d’accès devront être configurés de façon sécurisée côté serveur.</p>
-              <div className="connector-dialog-checks"><div><Check size={15} /><span>Logo et fiche de service prêts</span></div><div><Check size={15} /><span>Emplacement de configuration prévu</span></div><div><LockKeyhole size={15} /><span>OAuth et clés API non connectés</span></div></div>
-              <button className="primary-button full-width" onClick={() => { handleConnect(selectedConnector.name); setSelectedConnector(null); }} type="button">{configuredConnectors.includes(selectedConnector.name) ? "Confirmer l’état de préparation" : "Marquer comme prêt à configurer"} <ArrowRight size={15} /></button>
+              <p>{selectedConnector.description} L’accès est décrit par le catalogue de l’application d’origine. Dans cette nouvelle interface, aucun compte n’est connecté : les autorisations doivent passer par le backend existant.</p>
+              <div className="connector-dialog-meta"><div><span>État dans le catalogue d’origine</span><strong>{selectedConnector.availability === "configured" ? "Configuré côté serveur" : "Planifié"}</strong></div><div><span>Mode d’accès</span><strong>{selectedConnector.auth}</strong></div></div><div className="connector-operation-list"><div className="connector-operation-heading">Opérations prévues</div>{selectedConnector.operations.map((operation) => <div key={operation}><Check size={14} /><span>{operation}</span></div>)}</div><div className="connector-dialog-checks"><div><LockKeyhole size={15} /><span>Connexion non active dans cette branche</span></div><div><ShieldCheck size={15} /><span>Secrets et autorisations restent côté serveur</span></div></div>
+              <button className="primary-button full-width" onClick={() => { handleConnect(selectedConnector.name); setSelectedConnector(null); }} type="button">{configuredConnectors.includes(selectedConnector.name) ? "Confirmer la préparation locale" : "Préparer le raccordement"} <ArrowRight size={15} /></button>
               <button className="dialog-cancel" onClick={() => setSelectedConnector(null)} type="button">Annuler</button>
             </motion.div>
           </motion.div>
