@@ -161,6 +161,7 @@ export function IdealyStudio() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [commandOpen, setCommandOpen] = useState(false);
   const [commandQuery, setCommandQuery] = useState("");
+  const [activeCommandIndex, setActiveCommandIndex] = useState(0);
   const [input, setInput] = useState("");
   const [projectPrompt, setProjectPrompt] = useState("");
   const [projectTitle, setProjectTitle] = useState("Mon prochain projet");
@@ -254,6 +255,35 @@ export function IdealyStudio() {
       description: `${name} est marqué « prêt à configurer » dans cette maquette. Aucun compte externe n’a été lié.`,
     });
   };
+
+
+  useEffect(() => {
+    if (!commandOpen) return;
+    setActiveCommandIndex(0);
+  }, [commandOpen, commandQuery]);
+
+  useEffect(() => {
+    if (!commandOpen) return;
+    const onPaletteKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        setActiveCommandIndex((current) => {
+          if (!commands.length) return 0;
+          return event.key === "ArrowDown"
+            ? (current + 1) % commands.length
+            : (current - 1 + commands.length) % commands.length;
+        });
+      }
+      if (event.key === "Enter" && commands[activeCommandIndex]) {
+        event.preventDefault();
+        commands[activeCommandIndex].action();
+        setCommandOpen(false);
+        setCommandQuery("");
+      }
+    };
+    window.addEventListener("keydown", onPaletteKeyDown);
+    return () => window.removeEventListener("keydown", onPaletteKeyDown);
+  }, [activeCommandIndex, commandOpen, commands]);
 
   const templateCards = [
     { name: "Application web", category: "Produit", description: "Un produit complet avec comptes et espace personnel.", icon: LayoutDashboard, tint: "violet", prompt: "Construis une application web moderne avec un tableau de bord, une connexion et un espace personnel." },
@@ -507,7 +537,7 @@ export function IdealyStudio() {
             <motion.div className="command-dialog" initial={{ opacity: 0, y: -12, scale: .985 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8, scale: .985 }} transition={{ duration: .16 }} role="dialog" aria-modal="true" aria-label="Palette de commandes">
               <div className="command-search-row"><Search size={19} /><input autoFocus placeholder="Que souhaitez-vous faire ?" value={commandQuery} onChange={(event) => setCommandQuery(event.target.value)} /><kbd>ESC</kbd><button className="mini-icon" onClick={() => setCommandOpen(false)} aria-label="Fermer" type="button"><X size={16} /></button></div>
               <div className="command-section-label">ACTIONS RAPIDES</div>
-              <div className="command-results">{commands.map((cmd) => <button type="button" key={cmd.label} className="command-result" onClick={() => { cmd.action(); setCommandOpen(false); setCommandQuery(""); }}><span className="command-result-icon"><cmd.icon size={16} /></span><span>{cmd.label}</span><small>{cmd.hint}</small><ArrowRight size={14} className="command-result-arrow" /></button>)}
+              <div className="command-results">{commands.map((cmd, index) => <button type="button" key={cmd.label} className={`command-result ${activeCommandIndex === index ? "command-result-active" : ""}`} onMouseEnter={() => setActiveCommandIndex(index)} onClick={() => { cmd.action(); setCommandOpen(false); setCommandQuery(""); }}><span className="command-result-icon"><cmd.icon size={16} /></span><span>{cmd.label}</span><small>{cmd.hint}</small><ArrowRight size={14} className="command-result-arrow" /></button>)}
                 {commands.length === 0 ? <div className="command-no-results">Aucune action trouvée pour « {commandQuery} ».</div> : null}
               </div>
               <div className="command-footer"><span><kbd>↑</kbd><kbd>↓</kbd> naviguer</span><span><kbd>↵</kbd> sélectionner</span><span><kbd>esc</kbd> fermer</span></div>
