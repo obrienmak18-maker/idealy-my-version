@@ -62,6 +62,50 @@ const activityItems = [
   { title: "Connecteurs catalogués", detail: "11 services affichés, sans connexion externe active", time: "Récemment", icon: GitBranch, tint: "green" },
 ];
 
+type AgentLook = {
+  skin: string;
+  hair: string;
+  outfit: string;
+  accent: string;
+  backdrop: string;
+};
+
+const agentLooks: Record<string, AgentLook> = {
+  Chief: { skin: "#e9b795", hair: "#382653", outfit: "#7660df", accent: "#c7b8ff", backdrop: "#f0ecff" },
+  Builder: { skin: "#c88d6d", hair: "#2c2928", outfit: "#24a986", accent: "#b6f0dd", backdrop: "#e4f8f1" },
+  Designer: { skin: "#e9b394", hair: "#94436f", outfit: "#d776b6", accent: "#ffd1ed", backdrop: "#fff0fa" },
+  Specialist: { skin: "#b77b5a", hair: "#20324e", outfit: "#5488df", accent: "#bdd4ff", backdrop: "#eaf2ff" },
+  Reviewer: { skin: "#f0c29b", hair: "#78501f", outfit: "#d39a39", accent: "#ffe4a7", backdrop: "#fff4dc" },
+};
+
+function AgentPortrait({ name, size = 36 }: { name: string; size?: number }) {
+  const look = agentLooks[name] ?? agentLooks.Chief;
+  return (
+    <svg className="agent-portrait" aria-hidden="true" width={size} height={size} viewBox="0 0 48 48" fill="none">
+      <rect width="48" height="48" rx="13" fill={look.backdrop} />
+      <path d="M4 49 7.5 40.5C10 35 15.5 33 24 33s14 2 16.5 7.5L44 49Z" fill={look.outfit} />
+      <path d="M18.7 31.2h10.6v6.1c-1.8 2.1-3.5 2.9-5.3 2.9s-3.5-.8-5.3-2.9Z" fill={look.skin} />
+      <ellipse cx="13.7" cy="25.1" rx="2.5" ry="4" fill={look.skin} />
+      <ellipse cx="34.3" cy="25.1" rx="2.5" ry="4" fill={look.skin} />
+      <path d="M13.1 19.8c.5-7.4 4.4-11 10.9-11s10.4 3.6 10.9 11l-.6 8.1c-.3 6.3-4.7 10.8-10.3 10.8S14 34.2 13.7 27.9Z" fill={look.skin} />
+      {name === "Chief" ? <path d="M12.2 23.5C9.9 13.2 15.8 6 24 6s14.1 7.2 11.8 17.5l-2.1-3.8-2.8-5.8c-4.3 3.5-9.3 4.8-15.9 4.2Z" fill={look.hair} /> : null}
+      {name === "Builder" ? <path d="M12 23.2C10 14.4 14.4 7.4 23.6 7.4c8.7 0 12.9 6.8 12.3 15.1l-2.8-3.1-1.1-5.3c-4.5 3.3-10 4.7-16.2 4.1Z" fill={look.hair} /> : null}
+      {name === "Designer" ? <><path d="M11.1 23.5C8.7 13.5 14.2 7.2 23.8 7.2c9.2 0 14 6.5 12.3 16.7l-2.7 9.3-3.7-7.5 1-9.1c-4.8 3.4-10.7 4.5-16.2 3.4Z" fill={look.hair} /><path d="M12.4 14.2c2.8-6.2 7.5-8.7 13.1-8.1 3.1.3 5.9 1.7 7.8 4.3-6.4-.8-12.2 2.4-20.9 3.8Z" fill={look.accent} /></> : null}
+      {name === "Specialist" ? <path d="M11.2 23.6C8.7 15.1 13.1 7.4 22.8 7.1c10.1-.3 14.8 6.6 12.3 16.4l-2.6-4.4-2.1-6.3c-3.8 3-9.4 4.4-16.7 3.9Z" fill={look.hair} /> : null}
+      {name === "Reviewer" ? <path d="M11.5 23.5C9 13 14.2 7 24.2 7c9.6 0 14.3 6.4 12.3 16.2l-2.8 5.1-1.4-11.7c-5.5 2.4-10.7 2.8-17 1.8l-1.5 8.2Z" fill={look.hair} /> : null}
+      <path d="M17.5 24c1.1-.8 2.2-.8 3.2 0M27.3 24c1.1-.8 2.2-.8 3.2 0" stroke="#49362e" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M24 25.5 22.9 28h2.2" stroke="#b17b62" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M20.5 30.4c2.1 1.7 4.9 1.7 7 0" stroke="#9f5f56" strokeWidth="1.5" strokeLinecap="round" />
+      {name === "Specialist" ? <><rect x="15.2" y="21.3" width="7.2" height="5.6" rx="2.1" stroke="#24435f" strokeWidth="1.5" /><rect x="25.6" y="21.3" width="7.2" height="5.6" rx="2.1" stroke="#24435f" strokeWidth="1.5" /><path d="M22.4 23.4h3.2" stroke="#24435f" strokeWidth="1.3" /></> : null}
+      {name === "Builder" ? <path d="M12.3 23.5a11.7 11.7 0 0 1 23.4 0" stroke={look.accent} strokeWidth="2.6" strokeLinecap="round" /> : null}
+      {name === "Designer" ? <path d="m32.4 31.1 1.7-3.2 1.7 3.2 3.2 1.7-3.2 1.7-1.7 3.2-1.7-3.2-3.2-1.7Z" fill={look.accent} /> : null}
+      {name === "Chief" ? <path d="m14 37 1.5-3 1.5 3 3 1.5-3 1.5-1.5 3-1.5-3-3-1.5Z" fill={look.accent} /> : null}
+      {name === "Reviewer" ? <path d="m33 35 1.3 2.6 2.8.4-2 2 .5 2.7-2.6-1.3-2.4 1.3.5-2.7-2-2 2.7-.4Z" fill={look.accent} /> : null}
+      <path d="M16 47c1.8-4 4.5-5.8 8-5.8s6.2 1.8 8 5.8" stroke={look.accent} strokeWidth="1.3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 type FlowStageData = {
   step: string;
   title: string;
@@ -414,7 +458,7 @@ export function IdealyStudio() {
                     <div className="hero-mark"><BrandMark size={42} /></div>
                     <h1>Une idée en tête ?<br /><span>Construisons-la ensemble.</span></h1>
                     <p>Décrivez ce que vous imaginez. Idealy vous aide à organiser les prochaines étapes et à donner forme à votre projet.</p>
-                    <div className="hero-chips"><span><WandSparkles size={14} /> De l’idée au plan</span><span><Workflow size={14} /> Un canvas vivant</span><span><ShieldCheck size={14} /> Vous gardez le contrôle</span></div>
+                    <div className="hero-chips"><span><WandSparkles size={14} /> De l’idée au plan</span><span><Workflow size={14} /> Un canvas vivant</span><span><ShieldCheck size={14} /> Vous gardez le contrôle</span></div>\n                    <div className="hero-crew-row"><div className="hero-crew-avatars">{agents.map((agent) => <AgentPortrait key={agent.name} name={agent.name} size={27} />)}</div><div><strong>5 rôles complémentaires</strong><span>Planifier · Concevoir · Construire · Vérifier</span></div></div>
                   </section>
 
                   <form className="prompt-composer" onSubmit={(event) => { event.preventDefault(); startProject(); }}>
@@ -483,7 +527,7 @@ export function IdealyStudio() {
                         </div>
                       )}
                     </section>
-                    {showAgentPanel ? <aside className="agent-rail"><div className="agent-rail-header"><div><span className="eyebrow">ORCHESTRATION</span><h3>Équipe Idealy</h3></div><button className="mini-icon" onClick={() => navigate("agents")} type="button" aria-label="Voir l’équipe"><ArrowUpRight size={15} /></button></div><div className="agent-running-note"><span className="agent-pulse"><span /></span><div><strong>En attente de lancement</strong><span>Prête à recevoir votre mission</span></div></div><div className="agent-list">{agents.map((agent) => <button className="agent-mini-row" key={agent.name} onClick={() => navigate("agents")} type="button"><span className={`agent-avatar agent-${agent.color}`}>{agent.letter}</span><span className="agent-mini-meta"><strong>{agent.name}</strong><small>{agent.role}</small></span><span className="agent-idle">Repos</span></button>)}</div><div className="rail-divider" /><div className="rail-block-title"><span>CONTEXTE DU PROJET</span><button type="button" className="mini-icon" onClick={() => toast("Contexte", { description: "Les éléments de contexte seront conservés avec le projet." })}><Plus size={14} /></button></div><button className="context-entry" onClick={() => toast("Brief", { description: projectPrompt || "Aucun brief ajouté pour le moment." })} type="button"><FileText size={16} /><span><strong>Brief du projet</strong><small>{projectPrompt ? "1 élément de contexte" : "Aucun brief enregistré"}</small></span><ChevronRight size={14} /></button><button className="context-entry" onClick={() => navigate("connectors")} type="button"><GitBranch size={16} /><span><strong>Connecteurs</strong><small>{configuredConnectors.length} préparé(s)</small></span><ChevronRight size={14} /></button><div className="rail-bottom-tip"><Sparkles size={15} /><span>Les agents démarreront quand l’orchestration sera connectée.</span></div></aside> : null}
+                    {showAgentPanel ? <aside className="agent-rail"><div className="agent-rail-header"><div><span className="eyebrow">ORCHESTRATION</span><h3>Équipe Idealy</h3></div><button className="mini-icon" onClick={() => navigate("agents")} type="button" aria-label="Voir l’équipe"><ArrowUpRight size={15} /></button></div><div className="agent-running-note"><span className="agent-pulse"><span /></span><div><strong>En attente de lancement</strong><span>Prête à recevoir votre mission</span></div></div><div className="agent-list">{agents.map((agent) => <button className="agent-mini-row" key={agent.name} onClick={() => navigate("agents")} type="button"><AgentPortrait name={agent.name} size={31} /><span className="agent-mini-meta"><strong>{agent.name}</strong><small>{agent.role}</small></span><span className="agent-idle">Repos</span></button>)}</div><div className="rail-divider" /><div className="rail-block-title"><span>CONTEXTE DU PROJET</span><button type="button" className="mini-icon" onClick={() => toast("Contexte", { description: "Les éléments de contexte seront conservés avec le projet." })}><Plus size={14} /></button></div><button className="context-entry" onClick={() => toast("Brief", { description: projectPrompt || "Aucun brief ajouté pour le moment." })} type="button"><FileText size={16} /><span><strong>Brief du projet</strong><small>{projectPrompt ? "1 élément de contexte" : "Aucun brief enregistré"}</small></span><ChevronRight size={14} /></button><button className="context-entry" onClick={() => navigate("connectors")} type="button"><GitBranch size={16} /><span><strong>Connecteurs</strong><small>{configuredConnectors.length} préparé(s)</small></span><ChevronRight size={14} /></button><div className="rail-bottom-tip"><Sparkles size={15} /><span>Les agents démarreront quand l’orchestration sera connectée.</span></div></aside> : null}
                   </div>
                 </div>
               ) : null}
@@ -492,7 +536,7 @@ export function IdealyStudio() {
                 <div className="standard-page">
                   <SectionHeading eyebrow="ORCHESTRATION" title="Une équipe, cinq rôles." description="Chaque agent a une responsabilité claire. L’orchestrateur les coordonnera selon le besoin réel du projet." action={<button className="outline-button" onClick={() => navigate("canvas")} type="button"><Workflow size={15} /> Ouvrir le canvas</button>} />
                   <div className="agent-intro-card"><div className="agent-intro-mark"><BrandMark size={40} /></div><div><span className="eyebrow">IDÉE → PLAN → CONSTRUCTION</span><h2>Pas cinq chatbots indépendants. Une équipe coordonnée.</h2><p>Chief répartit le travail, les spécialistes interviennent au bon moment et Reviewer vérifie la cohérence avant de faire avancer le projet.</p></div><div className="agent-intro-flow"><span>Chief</span><ArrowRight size={14} /><span>Spécialistes</span><ArrowRight size={14} /><span>Reviewer</span></div></div>
-                  <div className="agents-grid">{agents.map((agent, index) => <motion.article key={agent.name} className="agent-card" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * .05 }}><div className="agent-card-top"><span className={`agent-avatar agent-avatar-large agent-${agent.color}`}>{agent.letter}</span><span className="agent-status-idle"><i /> En attente</span></div><span className="eyebrow">AGENT 0{index + 1}</span><h3>{agent.name}</h3><div className="agent-role">{agent.role}</div><p>{agent.detail}</p><div className="agent-card-footer"><span><Clock3 size={13} /> Non lancé</span><button className="mini-icon" onClick={() => toast(agent.name, { description: "La fiche détaillée sera reliée à la configuration de l’orchestrateur." })} type="button" aria-label={`Détails de ${agent.name}`}><ArrowUpRight size={15} /></button></div></motion.article>)}</div>
+                  <div className="agents-grid">{agents.map((agent, index) => <motion.article key={agent.name} className="agent-card" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * .05 }}><div className="agent-card-top"><AgentPortrait name={agent.name} size={44} /><span className="agent-status-idle"><i /> En attente</span></div><span className="eyebrow">AGENT 0{index + 1}</span><h3>{agent.name}</h3><div className="agent-role">{agent.role}</div><p>{agent.detail}</p><div className="agent-card-footer"><span><Clock3 size={13} /> Non lancé</span><button className="mini-icon" onClick={() => toast(agent.name, { description: "La fiche détaillée sera reliée à la configuration de l’orchestrateur." })} type="button" aria-label={`Détails de ${agent.name}`}><ArrowUpRight size={15} /></button></div></motion.article>)}</div>
                   <div className="notice-row"><ShieldCheck size={17} /><div><strong>Exécution réelle désactivée dans cette maquette</strong><span>Aucun agent n’est présenté comme actif. Les états évolueront en fonction des événements réels de l’orchestrateur.</span></div></div>
                 </div>
               ) : null}
