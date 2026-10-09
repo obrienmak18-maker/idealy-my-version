@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@xyflow/react/dist/style.css";
 
 :root {
   color-scheme: light;
@@ -728,4 +729,39 @@ kbd { display: inline-flex; align-items: center; justify-content: center; min-wi
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+
+/* Interactive XYFlow canvas */
+.plan-canvas-interactive { width: 100%; padding: 16px 14px 11px; }
+.reactflow-wrapper { width: 100%; height: 610px; min-width: 320px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface-soft); }
+.reactflow-wrapper .react-flow { background: var(--surface-soft); }
+.reactflow-wrapper .react-flow__background pattern circle { fill: var(--line-strong); }
+.reactflow-wrapper .react-flow__edge-path { stroke: color-mix(in srgb, var(--purple) 47%, var(--line-strong)); stroke-width: 1.7; }
+.reactflow-wrapper .react-flow__arrowhead { fill: var(--purple); }
+.reactflow-wrapper .react-flow__controls { overflow: hidden; border: 1px solid var(--line); border-radius: 9px; box-shadow: var(--shadow-sm); }
+.reactflow-wrapper .react-flow__controls-button { display: grid; place-items: center; width: 29px; height: 29px; border-bottom-color: var(--line); background: var(--surface); fill: var(--muted-strong); }
+.reactflow-wrapper .react-flow__controls-button:hover { background: var(--surface-hover); }
+.reactflow-wrapper .react-flow__minimap { overflow: hidden; border: 1px solid var(--line); border-radius: 9px; box-shadow: var(--shadow-sm); }
+.reactflow-wrapper .react-flow__minimap-mask { fill: var(--bg); fill-opacity: .68; }
+.reactflow-wrapper .react-flow__handle { width: 8px; height: 8px; border: 2px solid var(--surface); background: var(--purple); }
+.flow-node { position: relative; display: flex; align-items: center; gap: 12px; width: 390px; min-height: 79px; padding: 12px 13px; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--surface); box-shadow: 0 4px 13px rgba(35, 25, 70, .055); transition: border-color .15s ease, box-shadow .15s ease; }
+.flow-node:hover, .flow-node-selected { border-color: color-mix(in srgb, var(--purple) 62%, var(--line)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--purple) 8%, transparent), var(--shadow-sm); }
+.flow-node-done .flow-node-number { background: var(--green-soft); color: var(--green); }
+.flow-node-active { background: color-mix(in srgb, var(--purple-soft) 26%, var(--surface)); border-color: color-mix(in srgb, var(--purple) 49%, var(--line)); }
+.flow-node-active .flow-node-number { background: var(--purple); color: white; }
+.flow-node-number { display: grid; place-items: center; width: 31px; height: 31px; flex: 0 0 31px; border-radius: 9px; background: var(--surface-muted); color: var(--muted); font-size: 10px; font-weight: 760; }
+.flow-node-copy { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 0; }
+.flow-node-copy strong { color: var(--text); font-size: 11px; font-weight: 720; }
+.flow-node-copy span { color: var(--muted-strong); font-size: 10px; line-height: 1.4; }
+.flow-node-status { padding: 5px 6px; border-radius: 6px; background: var(--surface-muted); color: var(--muted); font-size: 9px; white-space: nowrap; }
+.flow-node-done .flow-node-status { background: var(--green-soft); color: var(--green); }
+.flow-node-active .flow-node-status { background: var(--purple-soft); color: var(--purple); }
+@media (max-width: 720px) {
+  .plan-canvas-interactive { padding: 12px 8px 9px; }
+  .reactflow-wrapper { height: 565px; min-width: 0; }
+  .flow-node { width: 270px; padding: 10px 9px; gap: 8px; }
+  .flow-node-status { display: none; }
+  .flow-node-copy strong { font-size: 10px; }
+  .flow-node-copy span { font-size: 9px; }
 }
