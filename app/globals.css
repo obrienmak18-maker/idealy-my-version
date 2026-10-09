@@ -818,3 +818,19 @@ kbd { display: inline-flex; align-items: center; justify-content: center; min-wi
 @media (min-width: 721px) and (max-width: 1250px) {
   .pricing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+
+.agent-portrait { display: block; flex: 0 0 auto; border-radius: 12px; filter: drop-shadow(0 2px 1px rgba(24,17,44,.05)); transition: transform .2s cubic-bezier(.2,.8,.2,1), filter .2s ease; }
+.agent-mini-row:hover .agent-portrait { transform: translateY(-1px) rotate(-3deg) scale(1.035); filter: drop-shadow(0 4px 3px rgba(24,17,44,.11)); }
+.agent-card:hover .agent-portrait { transform: translateY(-2px) rotate(-2deg) scale(1.04); filter: drop-shadow(0 5px 4px rgba(24,17,44,.1)); }
+.hero-crew-row { display: flex; align-items: center; justify-content: center; gap: 9px; margin-top: 16px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--surface) 75%, transparent); }
+.hero-crew-avatars { display: flex; align-items: center; padding-left: 5px; }
+.hero-crew-avatars .agent-portrait { width: 27px; height: 27px; margin-left: -5px; border: 2px solid var(--surface); border-radius: 9px; }
+.hero-crew-row > div:last-child { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; }
+.hero-crew-row strong { color: var(--text); font-size: 10px; font-weight: 720; }
+.hero-crew-row span { color: var(--muted); font-size: 9px; }
+@media (max-width: 720px) {
+  .hero-crew-row { margin-top: 13px; padding: 8px 10px; }
+  .hero-crew-row strong { font-size: 9px; }
+  .hero-crew-row span { font-size: 8px; }
+}
