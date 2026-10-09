@@ -173,6 +173,16 @@ function BrandMark({ size = 22 }: { size?: number }) {
 }
 
 function BrandIcon({ brand, size = 23 }: { brand: SimpleBrand; size?: number }) {
+  if (brand.title === "Google Drive") {
+    return (
+      <svg aria-label={brand.title} role="img" width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <path d="M7.71 3.5 1.29 14.5h6.42L14.13 3.5H7.71Z" fill="#0066DA" />
+        <path d="M14.13 3.5 20.55 14.5l-3.21 5.5H4.5l3.21-5.5h6.42Z" fill="#00AC47" />
+        <path d="M22.71 14.5 16.29 3.5h-4.32l6.42 11h4.32Z" fill="#EA4335" opacity=".1" />
+        <path d="M1.29 14.5l3.21 5.5h12.84l3.21-5.5H1.29Z" fill="#FFBA00" />
+      </svg>
+    );
+  }
   return (
     <svg aria-label={brand.title} role="img" width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
       <path d={brand.path} />
@@ -398,7 +408,7 @@ export function IdealyStudio() {
           {sidebarOpen ? <div className="nav-section-label nav-section-second">VOTRE ESPACE</div> : null}
           <nav className="nav-group" aria-label="Gestion de l’espace">
             {navItems.filter((item) => item.group === "manage").map((item) => (
-              <NavButton key={item.id} active={view === item.id} icon={item.icon} label={item.label} collapsed={!sidebarOpen} onClick={() => navigate(item.id)} badge={item.id === "connectors" ? (sidebarOpen ? "11" : undefined) : undefined} />
+              <NavButton key={item.id} active={view === item.id} icon={item.icon} label={item.label} collapsed={!sidebarOpen} onClick={() => navigate(item.id)} badge={item.id === "connectors" ? (sidebarOpen ? String(connectors.length) : undefined) : undefined} />
             ))}
           </nav>
 
