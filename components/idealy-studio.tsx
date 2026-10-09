@@ -15,7 +15,7 @@ import {
   siSlack, siStripe, siSupabase, siVercel,
 } from "simple-icons";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef, type ReactNode } from "react";
 import { Button as BaseButton } from "@base-ui/react/button";
 import { addEdge, Background, Controls, Handle, MiniMap, Position, ReactFlow, useEdgesState, useNodesState, type Connection, type Edge, type Node, type NodeProps } from "@xyflow/react";
 import { Toaster, toast } from "sonner";
@@ -168,6 +168,7 @@ export function IdealyStudio() {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [connectorQuery, setConnectorQuery] = useState("");
+  const connectorSearchRef = useRef<HTMLInputElement>(null);
   const [connectorCategory, setConnectorCategory] = useState("Tous");
   const [selectedConnector, setSelectedConnector] = useState<Connector | null>(null);
   const [configuredConnectors, setConfiguredConnectors] = useState<string[]>([]);
@@ -190,13 +191,20 @@ export function IdealyStudio() {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        setCommandOpen((open) => {
-          if (!open) {
-            setCommandQuery("");
-            setActiveCommandIndex(0);
-          }
-          return !open;
-        });
+        if (!commandOpen) {
+          setCommandQuery("");
+          setActiveCommandIndex(0);
+        }
+        setCommandOpen(!commandOpen);
+      }
+      if (event.key === "/" && view === "connectors") {
+        const target = event.target;
+        const isTyping = target instanceof HTMLElement &&
+          (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
+        if (!isTyping) {
+          event.preventDefault();
+          connectorSearchRef.current?.focus();
+        }
       }
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "j") {
         event.preventDefault();
@@ -213,7 +221,7 @@ export function IdealyStudio() {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [commandOpen, view]);
 
   const filteredConnectors = useMemo(() => connectors.filter((item) => {
     const matchesQuery = `${item.name} ${item.description}`.toLowerCase().includes(connectorQuery.toLowerCase());
@@ -228,6 +236,7 @@ export function IdealyStudio() {
       { label: "Voir les agents", hint: "Orchestration", icon: Blocks, action: () => setView("agents") },
       { label: "Gérer les connecteurs", hint: "Intégrations", icon: GitBranch, action: () => setView("connectors") },
       { label: "Voir l’activité", hint: "Historique", icon: History, action: () => setView("activity") },
+      { label: "Consulter les offres", hint: "Power et capacités", icon: CreditCard, action: () => setView("pricing") },
       { label: "Changer l’apparence", hint: "Thème", icon: theme === "light" ? Moon : Sun, action: () => setTheme(theme === "light" ? "dark" : "light") },
       { label: "Ouvrir les paramètres", hint: "Préférences", icon: Settings2, action: () => setView("settings") },
     ];
@@ -492,7 +501,7 @@ export function IdealyStudio() {
                 <div className="standard-page">
                   <SectionHeading eyebrow="ÉCOSYSTÈME" title="Tout votre espace, connecté." description="Choisissez les services qui aideront Idealy à travailler avec vos outils existants." action={<button className="outline-button" onClick={() => toast("Catalogue actualisé", { description: "Le catalogue local contient les services inclus dans cette maquette." })} type="button"><RefreshCw size={15} /> Actualiser</button>} />
                   <div className="connectors-summary"><div className="connector-summary-icon"><GitBranch size={20} /></div><div><strong>Vos outils, au même endroit.</strong><span>Les marques sont affichées avec leurs logos. Aucune connexion externe n’est active dans cette version.</span></div><div className="connector-summary-count"><strong>11</strong><span>services listés</span></div></div>
-                  <div className="connector-controls"><label className="connector-search"><Search size={16} /><input value={connectorQuery} onChange={(event) => setConnectorQuery(event.target.value)} placeholder="Rechercher un connecteur…" aria-label="Rechercher un connecteur" /><kbd>/</kbd></label><div className="filter-group"><Filter size={14} />{["Tous", "Build", "Design", "Data", "Team"].map((cat) => <button key={cat} onClick={() => setConnectorCategory(cat)} type="button" className={connectorCategory === cat ? "filter-chip active" : "filter-chip"}>{cat}</button>)}</div></div>
+                  <div className="connector-controls"><label className="connector-search"><Search size={16} /><input ref={connectorSearchRef} value={connectorQuery} onChange={(event) => setConnectorQuery(event.target.value)} placeholder="Rechercher un connecteur…" aria-label="Rechercher un connecteur" /><kbd>/</kbd></label><div className="filter-group"><Filter size={14} />{["Tous", "Build", "Design", "Data", "Team"].map((cat) => <button key={cat} onClick={() => setConnectorCategory(cat)} type="button" className={connectorCategory === cat ? "filter-chip active" : "filter-chip"}>{cat}</button>)}</div></div>
                   <div className="connectors-grid">{filteredConnectors.map((connector, index) => <motion.article className="connector-card" key={connector.name} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * .025 }}><div className="connector-card-top"><div className="connector-brand" style={{ color: `#${connector.brand.hex}` }}><BrandIcon brand={connector.brand} size={25} /></div><div className="connector-card-heading"><strong>{connector.name}</strong><span>{connector.category}</span></div>{connector.popular ? <span className="popular-dot" title="Connecteur populaire" /> : null}</div><p>{connector.description}</p><div className="connector-card-bottom"><span className={configuredConnectors.includes(connector.name) ? "connector-ready" : "connector-available"}><i />{configuredConnectors.includes(connector.name) ? "Prêt à configurer" : "Disponible"}</span><button className="connector-action" onClick={() => setSelectedConnector(connector)} type="button">{configuredConnectors.includes(connector.name) ? "Gérer" : "Configurer"} <ArrowUpRight size={13} /></button></div></motion.article>)}</div>
                   {filteredConnectors.length === 0 ? <div className="no-results"><Search size={22} /><strong>Aucun connecteur trouvé</strong><span>Essayez un autre nom ou changez de catégorie.</span><button className="text-action" onClick={() => { setConnectorQuery(""); setConnectorCategory("Tous"); }} type="button">Effacer les filtres</button></div> : null}
                   <div className="connector-bottom-note"><LockKeyhole size={14} /> Les autorisations OAuth et les clés d’accès seront ajoutées côté serveur. Aucun secret ne doit être placé dans le navigateur.</div>
