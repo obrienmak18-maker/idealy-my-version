@@ -4,7 +4,7 @@ import {
   Activity, ArrowRight, ArrowUpRight, Bell, Blocks,
   Check, CheckCheck, ChevronDown, ChevronRight, CircleHelp, Clock3, Code2, Command,
   Compass, CreditCard, Database, FileText, Filter,
-  GitBranch, Globe, History, Keyboard, Layers, LayoutDashboard, ListTodo,
+  GitBranch, Globe, History, Keyboard, Layers, LayoutDashboard, ListTodo, MessageCircle,
   LockKeyhole, Menu, Moon, MoreHorizontal, PanelLeftClose, PanelLeftOpen,
   Plus, Search, Settings2, ShieldCheck, Sparkles, Sun, WandSparkles, Workflow,
   X, Zap, Eye, SlidersHorizontal, Play, RefreshCw, ArrowUp, Paperclip,
@@ -20,6 +20,26 @@ import { addEdge, Background, Controls, Handle, MiniMap, Position, ReactFlow, us
 import { Toaster, toast } from "sonner";
 
 type View = "studio" | "canvas" | "agents" | "connectors" | "activity" | "pricing" | "settings";
+
+type ConversationPreview = {
+  question: string;
+  answer: string;
+  kind: "greeting" | "question";
+};
+
+function classifyPrompt(text: string): "greeting" | "question" | "build" {
+  const cleaned = text.trim().toLowerCase().replace(/[.!?,]+$/g, "");
+  const withoutGreeting = cleaned.replace(/^(hey|hi|hello|salut|bonjour|bonsoir|coucou|yo)[,\s!]+/i, "").trim();
+  const greetingPattern = /^(hey|hi|hello|salut|bonjour|bonsoir|coucou|yo|hola|ca va|ça va|how are you|good morning|good evening)(?:\s+(there|idealy|tout le monde))?$/i;
+  if (greetingPattern.test(cleaned)) return "greeting";
+
+  const hasBuildIntent = /\b(crée|créer|créez|construis|construire|développe|développer|génère|générer|fabrique|conçois|réalise|implémente|produis|build|create|make|develop|generate|implement|code)\b/i.test(withoutGreeting);
+  const startsAsQuestion = /^(comment|pourquoi|qu['’]est-ce|qu['’]est ce|explique|what is|what's|why|how does|how do|explain|peux-tu m'expliquer|peux tu m'expliquer|can you explain|could you explain)\b/i.test(withoutGreeting);
+  const asksQuestion = withoutGreeting.endsWith("?") || startsAsQuestion;
+
+  if (asksQuestion && !hasBuildIntent) return "question";
+  return "build";
+}
 type SimpleBrand = { title: string; hex: string; path: string };
 type ConnectorCategory = "code" | "deploy" | "data" | "billing" | "design" | "communication";
 type Connector = {
@@ -233,6 +253,7 @@ export function IdealyStudio() {
   const [commandQuery, setCommandQuery] = useState("");
   const [activeCommandIndex, setActiveCommandIndex] = useState(0);
   const [input, setInput] = useState("");
+  const [conversationPreview, setConversationPreview] = useState<ConversationPreview | null>(null);
   const [projectPrompt, setProjectPrompt] = useState("");
   const [projectTitle, setProjectTitle] = useState("Mon prochain projet");
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
@@ -301,7 +322,7 @@ export function IdealyStudio() {
 
   const commands = useMemo(() => {
     const all = [
-      { label: "Créer un nouveau projet", hint: "Nouvelle session", icon: Plus, action: () => { setView("studio"); setInput(""); setProjectPrompt(""); } },
+      { label: "Créer un nouveau projet", hint: "Nouvelle session", icon: Plus, action: () => { setView("studio"); setInput(""); setProjectPrompt(""); setConversationPreview(null); } },
       { label: "Ouvrir le canvas", hint: "Espace de travail", icon: Workflow, action: () => setView("canvas") },
       { label: "Voir les agents", hint: "Orchestration", icon: Blocks, action: () => setView("agents") },
       { label: "Gérer les connecteurs", hint: "Intégrations", icon: GitBranch, action: () => setView("connectors") },
@@ -319,6 +340,26 @@ export function IdealyStudio() {
       toast("Décrivez d’abord votre idée", { description: "Une phrase suffit pour commencer." });
       return;
     }
+
+    const intent = classifyPrompt(chosen);
+    if (intent !== "build") {
+      setConversationPreview({
+        question: chosen,
+        kind: intent,
+        answer: intent === "greeting"
+          ? "Salut ! 👋 Je suis là. Tu peux me poser une question ou me décrire quelque chose que tu veux construire."
+          : "Cette demande doit rester dans le chat rapide, sans créer de canvas ni lancer l’escouade. Le moteur de chat n’est pas raccordé dans cette branche : aucun modèle IA n’a été appelé.",
+      });
+      setInput("");
+      toast(intent === "greeting" ? "Réponse rapide · démonstration locale" : "Aucun agent lancé", {
+        description: intent === "greeting"
+          ? "Une salutation ne démarre pas de mission. Cette réponse est locale, aucun modèle n’a été appelé."
+          : "La demande a été gardée hors du canvas. Le moteur conversationnel sera raccordé au service existant.",
+      });
+      return;
+    }
+
+    setConversationPreview(null);
     setProjectPrompt(chosen);
     const firstWords = chosen.replace(/[.!?].*$/, "").split(/\s+/).slice(0, 5).join(" ");
     setProjectTitle(firstWords.length > 2 ? firstWords.charAt(0).toUpperCase() + firstWords.slice(1) : "Nouveau projet");
@@ -393,7 +434,7 @@ export function IdealyStudio() {
           {sidebarOpen ? <><span className="workspace-meta"><strong>Mon espace</strong><small>Workspace personnel</small></span><ChevronDown size={15} className="muted-icon" /></> : null}
         </button>
 
-        <button className="new-project-button" onClick={() => { navigate("studio"); setInput(""); setProjectPrompt(""); }} type="button">
+        <button className="new-project-button" onClick={() => { navigate("studio"); setInput(""); setProjectPrompt(""); setConversationPreview(null); }} type="button">
           <Plus size={17} /><span>{sidebarOpen ? "Nouveau projet" : ""}</span>
           {sidebarOpen ? <kbd>Ctrl J</kbd> : null}
         </button>
@@ -489,15 +530,27 @@ export function IdealyStudio() {
 
                   <form className="prompt-composer" onSubmit={(event) => { event.preventDefault(); startProject(); }}>
                     <div className="composer-topline"><span className="composer-dot" /><span>Nouvelle mission</span><span className="composer-note">Commencez simplement</span></div>
-                    <textarea value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); startProject(); } }} placeholder="J’aimerais créer une application qui aide les petites équipes à…" rows={3} aria-label="Décrivez votre idée" />
+                    <textarea value={input} onChange={(event) => { setInput(event.target.value); setConversationPreview(null); }} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); startProject(); } }} placeholder="J’aimerais créer une application qui aide les petites équipes à…" rows={3} aria-label="Décrivez votre idée" />
                     <div className="composer-bottom"><div className="composer-tools"><button type="button" className="composer-tool" onClick={() => toast("Ajout de fichier", { description: "Les pièces jointes seront reliées au stockage du projet." })}><Paperclip size={16} /><span>Ajouter</span></button><button type="button" className="composer-tool" onClick={() => toast("Contexte du projet", { description: "Le contexte sera sauvegardé lorsque la persistance sera raccordée." })}><Layers size={16} /><span>Contexte</span></button><span className="composer-hint"><Keyboard size={13} /> Entrée pour envoyer</span></div><BaseButton type="submit" className="send-button" aria-label="Préparer le projet"><ArrowUp size={18} /><span>Commencer</span></BaseButton></div>
                   </form>
+
+                  {conversationPreview ? (
+                    <motion.section className="fast-chat-preview" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}>
+                      <div className="fast-chat-header">
+                        <span className="fast-chat-symbol"><MessageCircle size={16} /></span>
+                        <div><span className="eyebrow">{conversationPreview.kind === "greeting" ? "CHEMIN RAPIDE" : "MODE CONVERSATIONNEL"}</span><strong>{conversationPreview.kind === "greeting" ? "Réponse instantanée de démonstration" : "Aucun canvas ni agent lancé"}</strong></div>
+                        <button className="mini-icon" type="button" aria-label="Fermer l’aperçu de conversation" onClick={() => setConversationPreview(null)}><X size={15} /></button>
+                      </div>
+                      <div className="fast-chat-turn"><span className="fast-chat-speaker">Vous</span><p>{conversationPreview.question}</p></div>
+                      <div className="fast-chat-turn fast-chat-assistant"><span className="fast-chat-avatar"><BrandMark size={19} /></span><div><p>{conversationPreview.answer}</p><small>Prototype local · aucune IA appelée</small></div></div>
+                    </motion.section>
+                  ) : null}
 
                   <div className="template-section">
                     <div className="template-heading"><div><span className="eyebrow">POUR DÉMARRER PLUS VITE</span><h2>Ou partez d’un point de départ</h2></div><button className="text-action" onClick={() => toast("Galerie de modèles", { description: "Les modèles complets seront chargés depuis le catalogue Idealy." })} type="button">Explorer les modèles <ArrowRight size={14} /></button></div>
                     <div className="template-grid">
                       {templateCards.map((template, index) => (
-                        <motion.button key={template.name} className={`template-card ${selectedTemplate === template.name ? "template-card-selected" : ""}`} onClick={() => { setSelectedTemplate(template.name); setInput(template.prompt); }} whileHover={{ y: -3 }} whileTap={{ scale: .99 }} type="button" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * .055 }}>
+                        <motion.button key={template.name} className={`template-card ${selectedTemplate === template.name ? "template-card-selected" : ""}`} onClick={() => { setSelectedTemplate(template.name); setInput(template.prompt); setConversationPreview(null); }} whileHover={{ y: -3 }} whileTap={{ scale: .99 }} type="button" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * .055 }}>
                           <div className="template-card-top"><WorkspaceIcon icon={template.icon} tint={template.tint} /><span className="template-category">{template.category}</span><ArrowUpRight size={15} className="template-arrow" /></div>
                           <strong>{template.name}</strong><p>{template.description}</p>
                         </motion.button>
