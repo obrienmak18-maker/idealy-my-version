@@ -9,8 +9,8 @@ A fresh UI implementation for Idealy, kept separate from the original applicatio
 - Motion for interface movement and transitions
 - Lucide for UI icons; Simple Icons for brand marks
 - Sonner for toast feedback
-- shadcn-compatible component conventions, with Radix and Base UI available for accessible primitives
-- XYFlow available for the next iteration of the real, interactive workflow canvas
+- shadcn/ui conventions configured for Base UI, plus a shared `cn` utility for accessible, reusable components
+- XYFlow powers the interactive, draggable and connectable workflow canvas
 
 ## Run locally
 
@@ -21,6 +21,6 @@ pnpm dev
 
 ## Scope of this first pass
 
-This commit establishes the workspace UI and the interaction patterns for navigation, command palette, canvas, agent activity, connectors, notifications, appearance, and plan overview. AI generation, OAuth, persistence, billing, and connector APIs are deliberately not faked as live services; the visible interactions are a local front-end prototype.
+This first version establishes the workspace UI and the interaction patterns for navigation, a keyboard-accessible command palette, a draggable workflow canvas, illustrated agent portraits, the real nine-item connector catalogue from Idealy, activity, notifications, themes, and the four existing plan tiers with product-configured prices. AI generation, OAuth, project persistence, notifications from the backend, and billing are not represented as live services; those interactions are explicitly marked as local prototype behavior.
 
 The welcome, registration, and initial profile-information flows remain outside this repo's scope so they can later be retained from the original project as requested.
