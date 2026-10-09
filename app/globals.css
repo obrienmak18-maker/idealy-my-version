@@ -775,3 +775,37 @@ kbd { display: inline-flex; align-items: center; justify-content: center; min-wi
   .mobile-scrim { display: block; position: fixed; z-index: 18; inset: 0; border: 0; background: rgba(24, 17, 44, .30); backdrop-filter: blur(2px); cursor: pointer; }
   .sidebar { z-index: 20; }
 }
+
+
+.billing-switch-row { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin: -7px 0 18px; }
+.billing-switch { display: inline-flex; align-items: center; gap: 3px; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-muted); }
+.billing-switch button { display: inline-flex; align-items: center; gap: 8px; min-height: 31px; padding: 0 11px; border: 1px solid transparent; border-radius: 7px; background: transparent; color: var(--muted-strong); font-size: 10px; cursor: pointer; }
+.billing-switch button:hover { color: var(--text); }
+.billing-switch button.billing-switch-active { border-color: var(--line); background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); font-weight: 700; }
+.billing-switch button span { color: var(--green); font-size: 9px; font-weight: 700; }
+.billing-switch-caption { color: var(--muted); font-size: 10px; }
+.price-display { display: flex; flex-direction: column; gap: 5px; margin: 17px 0 12px; min-height: 58px; }
+.price-line { display: flex; align-items: baseline; gap: 5px; color: var(--text-strong); }
+.price-line strong { font-size: 26px; font-weight: 730; letter-spacing: -.055em; }
+.price-line span { color: var(--muted); font-size: 10px; }
+.price-billing-note { color: var(--muted); font-size: 9px; line-height: 1.4; }
+.power-allocation { display: flex; align-items: center; gap: 8px; min-height: 49px; padding: 9px; background: var(--surface-soft); border: 1px solid var(--line); border-radius: 9px; margin-bottom: 13px; }
+.power-allocation-icon { display: grid; place-items: center; width: 27px; height: 27px; border-radius: 7px; color: var(--purple); background: var(--purple-soft); }
+.power-allocation > span:last-child { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.power-allocation strong { font-size: 10px; font-weight: 700; color: var(--text); }
+.power-allocation small { font-size: 9px; color: var(--muted); }
+.business-plan-label { background: var(--blue-soft); color: var(--blue); }
+.pricing-card ul { margin-top: 0; }
+.pricing-card li { line-height: 1.45; }
+.pricing-card { padding: 17px; }
+.pricing-card h2 { font-size: 17px; min-height: 40px; }
+.pricing-card > p { min-height: 63px; }
+.pricing-card ul { gap: 10px; }
+@media (max-width: 720px) {
+  .billing-switch-row { align-items: flex-start; flex-direction: column; margin-top: -3px; }
+  .billing-switch { width: 100%; }
+  .billing-switch button { justify-content: center; flex: 1; padding-inline: 6px; }
+  .billing-switch-caption { padding-left: 2px; }
+  .pricing-card h2 { min-height: unset; }
+  .pricing-card > p { min-height: unset; }
+}
