@@ -552,7 +552,7 @@ export function IdealyStudio() {
                     ].map((plan, index) => {
                       const value = billingCycle === "yearly" ? plan.annual : plan.monthly;
                       const numeric = typeof value === "number";
-                      const monthlyEquivalent = plan.key === "pro" ? 15.9 : plan.key === "business" ? 40.9 : value;
+                      const monthlyEquivalent = plan.key === "pro" ? 15.9 : plan.key === "business" ? 40.9 : typeof value === "number" ? value : 0;
                       return (
                         <motion.article className={`pricing-card ${index === 1 ? "pricing-card-featured" : ""}`} key={plan.key} initial={{ opacity: 0, y: 9 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * .05 }}>
                           <div className="pricing-card-top">
