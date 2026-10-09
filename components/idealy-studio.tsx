@@ -17,7 +17,7 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Button as BaseButton } from "@base-ui/react/button";
-import { addEdge, Background, Controls, Handle, Position, ReactFlow, useEdgesState, useNodesState, type Connection, type Edge, type Node, type NodeProps } from "@xyflow/react";
+import { addEdge, Background, Controls, Handle, MiniMap, Position, ReactFlow, useEdgesState, useNodesState, type Connection, type Edge, type Node, type NodeProps } from "@xyflow/react";
 import { Toaster, toast } from "sonner";
 
 type View = "studio" | "canvas" | "agents" | "connectors" | "activity" | "pricing" | "settings";
