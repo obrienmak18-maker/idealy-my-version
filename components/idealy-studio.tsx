@@ -1,13 +1,13 @@
 "use client";
 
 import {
-  Activity, ArrowDownRight, ArrowLeft, ArrowRight, ArrowUpRight, Bell, Blocks, BookOpen,
+  Activity, ArrowRight, ArrowUpRight, Bell, Blocks,
   Check, CheckCheck, ChevronDown, ChevronRight, CircleHelp, Clock3, Code2, Command,
-  Compass, Copy, CreditCard, Database, FileCode2, FileImage, FileText, Filter, FolderOpen,
-  GitBranch, Globe, History, Home, Keyboard, Layers, LayoutDashboard, LifeBuoy, ListTodo,
-  LockKeyhole, Menu, MessageCircle, Moon, MoreHorizontal, PanelLeftClose, PanelLeftOpen,
-  Plus, Search, Settings2, ShieldCheck, Sparkles, Sun, Terminal, WandSparkles, Workflow,
-  X, Zap, Eye, SlidersHorizontal, Play, Pause, RefreshCw, ArrowUp, Paperclip, Mic,
+  Compass, CreditCard, Database, FileText, Filter,
+  GitBranch, Globe, History, Keyboard, Layers, LayoutDashboard, ListTodo,
+  LockKeyhole, Menu, Moon, MoreHorizontal, PanelLeftClose, PanelLeftOpen,
+  Plus, Search, Settings2, ShieldCheck, Sparkles, Sun, WandSparkles, Workflow,
+  X, Zap, Eye, SlidersHorizontal, Play, RefreshCw, ArrowUp, Paperclip,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -120,14 +120,14 @@ function BrandIcon({ brand, size = 23 }: { brand: SimpleBrand; size?: number }) 
   );
 }
 
-function NavButton({ active, icon: Icon, label, onClick, badge }: {
-  active: boolean; icon: LucideIcon; label: string; onClick: () => void; badge?: string;
+function NavButton({ active, icon: Icon, label, onClick, badge, collapsed = false }: {
+  active: boolean; icon: LucideIcon; label: string; onClick: () => void; badge?: string; collapsed?: boolean;
 }) {
   return (
-    <button className={`nav-item ${active ? "nav-item-active" : ""}`} onClick={onClick} type="button">
+    <button className={`nav-item ${active ? "nav-item-active" : ""}`} onClick={onClick} type="button" title={collapsed ? label : undefined} aria-label={label}>
       <Icon size={17} strokeWidth={active ? 2.1 : 1.8} />
-      <span>{label}</span>
-      {badge ? <span className="nav-badge">{badge}</span> : null}
+      <span className={collapsed ? "nav-label-collapsed" : ""}>{label}</span>
+      {badge && !collapsed ? <span className="nav-badge">{badge}</span> : null}
       {active ? <motion.span className="nav-active-edge" layoutId="nav-edge" /> : null}
     </button>
   );
@@ -174,7 +174,7 @@ export function IdealyStudio() {
   const [language, setLanguage] = useState("Français");
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notificationsRead, setNotificationsRead] = useState(false);
-  const [canvasTab, setCanvasTab] = useState<"Aperçu" | "Plan" | "Code" | "Données">("Aperçu");
+  const [canvasTab, setCanvasTab] = useState<"Aperçu" | "Plan" | "Code" | "Données">("Plan");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showAgentPanel, setShowAgentPanel] = useState(true);
   const [flowNodes, , onFlowNodesChange] = useNodesState(initialFlowNodes);
@@ -314,14 +314,14 @@ export function IdealyStudio() {
 
         <button className="new-project-button" onClick={() => { navigate("studio"); setInput(""); setProjectPrompt(""); }} type="button">
           <Plus size={17} /><span>{sidebarOpen ? "Nouveau projet" : ""}</span>
-          {sidebarOpen ? <kbd>⌘ J</kbd> : null}
+          {sidebarOpen ? <kbd>Ctrl J</kbd> : null}
         </button>
 
         <div className="sidebar-scroll">
           {sidebarOpen ? <div className="nav-section-label">ESPACE DE CRÉATION</div> : null}
           <nav className="nav-group" aria-label="Espace de création">
             {navItems.filter((item) => item.group === "create").map((item) => (
-              <NavButton key={item.id} active={view === item.id} icon={item.icon} label={sidebarOpen ? item.label : ""} onClick={() => navigate(item.id)} />
+              <NavButton key={item.id} active={view === item.id} icon={item.icon} label={item.label} collapsed={!sidebarOpen} onClick={() => navigate(item.id)} />
             ))}
           </nav>
           {sidebarOpen ? <div className="nav-section-label nav-section-second">VOTRE ESPACE</div> : null}
@@ -358,6 +358,7 @@ export function IdealyStudio() {
           </button>
         </div>
       </aside>
+      {mobileMenuOpen ? <button className="mobile-scrim" aria-label="Fermer la navigation" onClick={() => setMobileMenuOpen(false)} type="button" /> : null}
 
       <main className="main-shell">
         <header className="topbar">
@@ -371,7 +372,7 @@ export function IdealyStudio() {
           </div>
           <div className="topbar-actions">
             <button className="command-trigger" type="button" onClick={() => { setCommandQuery(""); setCommandOpen(true); }}>
-              <Search size={15} /><span>Rechercher</span><kbd>⌘ K</kbd>
+              <Search size={15} /><span>Rechercher</span><kbd>Ctrl K</kbd>
             </button>
             <div className="topbar-divider" />
             <button className="icon-button top-action" type="button" aria-label="Aide" onClick={() => toast("Centre d’aide", { description: "La documentation Idealy sera reliée ici." })}><CircleHelp size={18} /></button>
@@ -471,7 +472,7 @@ export function IdealyStudio() {
                         </div>
                       )}
                     </section>
-                    {showAgentPanel ? <aside className="agent-rail"><div className="agent-rail-header"><div><span className="eyebrow">ORCHESTRATION</span><h3>Équipe Idealy</h3></div><button className="mini-icon" onClick={() => navigate("agents")} type="button" aria-label="Voir l’équipe"><ArrowUpRight size={15} /></button></div><div className="agent-running-note"><span className="agent-pulse"><span /></span><div><strong>En attente de lancement</strong><span>Prête à recevoir votre mission</span></div></div><div className="agent-list">{agents.map((agent, i) => <button className="agent-mini-row" key={agent.name} onClick={() => navigate("agents")} type="button"><span className={`agent-avatar agent-${agent.color}`}>{agent.letter}</span><span className="agent-mini-meta"><strong>{agent.name}</strong><small>{agent.role}</small></span><span className="agent-idle">Repos</span></button>)}</div><div className="rail-divider" /><div className="rail-block-title"><span>CONTEXTE DU PROJET</span><button type="button" className="mini-icon" onClick={() => toast("Contexte", { description: "Les éléments de contexte seront conservés avec le projet." })}><Plus size={14} /></button></div><button className="context-entry" onClick={() => toast("Brief", { description: projectPrompt || "Aucun brief ajouté pour le moment." })} type="button"><FileText size={16} /><span><strong>Brief du projet</strong><small>{projectPrompt ? "1 élément de contexte" : "Aucun brief enregistré"}</small></span><ChevronRight size={14} /></button><button className="context-entry" onClick={() => navigate("connectors")} type="button"><GitBranch size={16} /><span><strong>Connecteurs</strong><small>{configuredConnectors.length} préparé(s)</small></span><ChevronRight size={14} /></button><div className="rail-bottom-tip"><Sparkles size={15} /><span>Les agents démarreront quand l’orchestration sera connectée.</span></div></aside> : null}
+                    {showAgentPanel ? <aside className="agent-rail"><div className="agent-rail-header"><div><span className="eyebrow">ORCHESTRATION</span><h3>Équipe Idealy</h3></div><button className="mini-icon" onClick={() => navigate("agents")} type="button" aria-label="Voir l’équipe"><ArrowUpRight size={15} /></button></div><div className="agent-running-note"><span className="agent-pulse"><span /></span><div><strong>En attente de lancement</strong><span>Prête à recevoir votre mission</span></div></div><div className="agent-list">{agents.map((agent) => <button className="agent-mini-row" key={agent.name} onClick={() => navigate("agents")} type="button"><span className={`agent-avatar agent-${agent.color}`}>{agent.letter}</span><span className="agent-mini-meta"><strong>{agent.name}</strong><small>{agent.role}</small></span><span className="agent-idle">Repos</span></button>)}</div><div className="rail-divider" /><div className="rail-block-title"><span>CONTEXTE DU PROJET</span><button type="button" className="mini-icon" onClick={() => toast("Contexte", { description: "Les éléments de contexte seront conservés avec le projet." })}><Plus size={14} /></button></div><button className="context-entry" onClick={() => toast("Brief", { description: projectPrompt || "Aucun brief ajouté pour le moment." })} type="button"><FileText size={16} /><span><strong>Brief du projet</strong><small>{projectPrompt ? "1 élément de contexte" : "Aucun brief enregistré"}</small></span><ChevronRight size={14} /></button><button className="context-entry" onClick={() => navigate("connectors")} type="button"><GitBranch size={16} /><span><strong>Connecteurs</strong><small>{configuredConnectors.length} préparé(s)</small></span><ChevronRight size={14} /></button><div className="rail-bottom-tip"><Sparkles size={15} /><span>Les agents démarreront quand l’orchestration sera connectée.</span></div></aside> : null}
                   </div>
                 </div>
               ) : null}
@@ -521,7 +522,7 @@ export function IdealyStudio() {
               {view === "settings" ? (
                 <div className="standard-page settings-page">
                   <SectionHeading eyebrow="PRÉFÉRENCES" title="Un workspace à votre façon." description="Les préférences visuelles sont interactives dans cette maquette. Les préférences de compte seront sauvegardées après raccordement." />
-                  <div className="settings-layout"><div className="settings-nav"><div className="settings-nav-title">PRÉFÉRENCES</div><span className="settings-nav-active"><SlidersHorizontal size={15} /> Général</span><button type="button" onClick={() => navigate("connectors")}><GitBranch size={15} /> Connecteurs</button><button type="button" onClick={() => navigate("pricing")}><CreditCard size={15} /> Offre et facturation</button><button type="button" onClick={() => toast("Sécurité du compte", { description: "Les paramètres d’authentification restent ceux du projet d’origine." })}><ShieldCheck size={15} /> Sécurité</button></div><div className="settings-content"><section className="settings-section"><div className="settings-section-heading"><div><h2>Apparence</h2><p>Choisissez le thème de votre espace de travail.</p></div><span className="settings-mini-tag">Instantané</span></div><div className="theme-options"><button className={theme === "light" ? "theme-option theme-option-selected" : "theme-option"} onClick={() => setTheme("light")} type="button"><div className="theme-preview light-preview"><div /><span /></div><span><strong>Clair</strong><small>Clair et lumineux</small></span>{theme === "light" ? <Check size={16} /> : null}</button><button className={theme === "dark" ? "theme-option theme-option-selected" : "theme-option"} onClick={() => setTheme("dark")} type="button"><div className="theme-preview dark-preview"><div /><span /></div><span><strong>Sombre</strong><small>Confort en faible lumière</small></span>{theme === "dark" ? <Check size={16} /> : null}</button></div></section><section className="settings-section"><div className="settings-section-heading"><div><h2>Langue de l’interface</h2><p>Le catalogue de langues sera étendu à l’ensemble des écrans.</p></div></div><label className="select-setting"><Globe size={16} /><select value={language} onChange={(event) => { setLanguage(event.target.value); toast("Langue sélectionnée", { description: "La traduction complète sera raccordée au système i18n existant." }); }}><option>Français</option><option>English</option><option>Español</option></select><ChevronDown size={15} /></label><p className="settings-help">Langue choisie : {language}. Le changement est prévisualisé ici, mais les dictionnaires complets ne sont pas encore reliés.</p></section><section className="settings-section"><div className="settings-section-heading"><div><h2>Raccourcis</h2><p>Les actions principales sont accessibles au clavier.</p></div></div><div className="shortcut-row"><span>Ouvrir la palette de commandes</span><kbd>Ctrl K</kbd></div><div className="shortcut-row"><span>Aller au canvas</span><button className="shortcut-action" onClick={() => navigate("canvas")} type="button">Ouvrir <ArrowRight size={13} /></button></div></section><div className="settings-save-row"><span><ShieldCheck size={14} /> Les préférences de cette maquette restent locales.</span><button className="primary-button" onClick={() => toast.success("Préférences appliquées", { description: "Le thème est appliqué à l’interface actuelle." })} type="button">Terminé <Check size={15} /></button></div></div></div>
+                  <div className="settings-layout"><div className="settings-nav"><div className="settings-nav-title">PRÉFÉRENCES</div><span className="settings-nav-active"><SlidersHorizontal size={15} /> Général</span><button type="button" onClick={() => navigate("connectors")}><GitBranch size={15} /> Connecteurs</button><button type="button" onClick={() => navigate("pricing")}><CreditCard size={15} /> Offre et facturation</button><button type="button" onClick={() => toast("Sécurité du compte", { description: "Les paramètres d’authentification restent ceux du projet d’origine." })}><ShieldCheck size={15} /> Sécurité</button></div><div className="settings-content"><section className="settings-section"><div className="settings-section-heading"><div><h2>Apparence</h2><p>Choisissez le thème de votre espace de travail.</p></div><span className="settings-mini-tag">Instantané</span></div><div className="theme-options"><button className={theme === "light" ? "theme-option theme-option-selected" : "theme-option"} onClick={() => setTheme("light")} type="button"><div className="theme-preview light-preview"><div /><span /></div><span><strong>Clair</strong><small>Clair et lumineux</small></span>{theme === "light" ? <Check size={16} /> : null}</button><button className={theme === "dark" ? "theme-option theme-option-selected" : "theme-option"} onClick={() => setTheme("dark")} type="button"><div className="theme-preview dark-preview"><div /><span /></div><span><strong>Sombre</strong><small>Confort en faible lumière</small></span>{theme === "dark" ? <Check size={16} /> : null}</button></div></section><section className="settings-section"><div className="settings-section-heading"><div><h2>Langue de l’interface</h2><p>Le catalogue de langues sera étendu à l’ensemble des écrans.</p></div></div><label className="select-setting"><Globe size={16} /><select value={language} onChange={(event) => { setLanguage(event.target.value); toast("Langue sélectionnée", { description: "La traduction complète sera raccordée au système i18n existant." }); }}><option>Français</option><option disabled>English — traduction complète à venir</option><option disabled>Español — traducción completa próximamente</option></select><ChevronDown size={15} /></label><p className="settings-help">La langue française reste active. Les autres langues seront activées quand chaque écran disposera de sa traduction complète.</p></section><section className="settings-section"><div className="settings-section-heading"><div><h2>Raccourcis</h2><p>Les actions principales sont accessibles au clavier.</p></div></div><div className="shortcut-row"><span>Ouvrir la palette de commandes</span><kbd>Ctrl K</kbd></div><div className="shortcut-row"><span>Aller au canvas</span><button className="shortcut-action" onClick={() => navigate("canvas")} type="button">Ouvrir <ArrowRight size={13} /></button></div></section><div className="settings-save-row"><span><ShieldCheck size={14} /> Les préférences de cette maquette restent locales.</span><button className="primary-button" onClick={() => toast.success("Préférences appliquées", { description: "Le thème est appliqué à l’interface actuelle." })} type="button">Terminé <Check size={15} /></button></div></div></div>
                 </div>
               ) : null}
             </motion.div>
