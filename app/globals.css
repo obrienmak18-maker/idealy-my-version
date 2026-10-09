@@ -834,3 +834,19 @@ kbd { display: inline-flex; align-items: center; justify-content: center; min-wi
   .hero-crew-row strong { font-size: 9px; }
   .hero-crew-row span { font-size: 8px; }
 }
+
+
+.catalog-status { flex-shrink: 0; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-soft); color: var(--muted); font-size: 8px; white-space: nowrap; }
+.catalog-status-configured { border-color: color-mix(in srgb, var(--green) 24%, var(--line)); background: var(--green-soft); color: var(--green); }
+.connector-dialog-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
+.connector-dialog-meta > div { display: flex; flex-direction: column; gap: 5px; min-width: 0; padding: 10px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-soft); }
+.connector-dialog-meta span { color: var(--muted); font-size: 9px; }
+.connector-dialog-meta strong { color: var(--text); font-size: 10px; font-weight: 700; }
+.connector-operation-list { padding: 14px 0 12px; margin-top: 12px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.connector-operation-heading { color: var(--muted); font-size: 9px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 9px; }
+.connector-operation-list > div:not(.connector-operation-heading) { display: flex; align-items: flex-start; gap: 7px; padding: 5px 0; color: var(--muted-strong); font-size: 10px; line-height: 1.45; }
+.connector-operation-list svg { color: var(--green); margin-top: 1px; }
+@media (max-width: 720px) {
+  .connector-card-top { flex-wrap: wrap; }
+  .catalog-status { margin-left: auto; }
+}
