@@ -15,7 +15,9 @@ import {
   siSlack, siStripe, siSupabase, siVercel,
 } from "simple-icons";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { Button as BaseButton } from "@base-ui/react/button";
+import { addEdge, Background, Controls, Handle, Position, ReactFlow, useEdgesState, useNodesState, type Connection, type Edge, type Node, type NodeProps } from "@xyflow/react";
 import { Toaster, toast } from "sonner";
 
 type View = "studio" | "canvas" | "agents" | "connectors" | "activity" | "pricing" | "settings";
@@ -60,6 +62,41 @@ const activityItems = [
   { title: "Connecteurs catalogués", detail: "11 services affichés, sans connexion externe active", time: "Récemment", icon: GitBranch, tint: "green" },
 ];
 
+type FlowStageData = {
+  step: string;
+  title: string;
+  description: string;
+  status: "done" | "active" | "next";
+};
+
+const initialFlowNodes: Node<FlowStageData>[] = [
+  { id: "scope", type: "stage", position: { x: 140, y: 24 }, data: { step: "01", title: "Définir le périmètre", description: "Clarifier l’objectif et les utilisateurs.", status: "done" } },
+  { id: "design", type: "stage", position: { x: 140, y: 190 }, data: { step: "02", title: "Concevoir l’expérience", description: "Organiser les écrans, composants et états.", status: "active" } },
+  { id: "build", type: "stage", position: { x: 140, y: 356 }, data: { step: "03", title: "Construire la solution", description: "Préparer l’interface et les comportements.", status: "next" } },
+  { id: "review", type: "stage", position: { x: 140, y: 522 }, data: { step: "04", title: "Vérifier la qualité", description: "Accessibilité, responsive et cohérence.", status: "next" } },
+];
+
+const initialFlowEdges: Edge[] = [
+  { id: "scope-design", source: "scope", target: "design", type: "smoothstep" },
+  { id: "design-build", source: "design", target: "build", type: "smoothstep" },
+  { id: "build-review", source: "build", target: "review", type: "smoothstep" },
+];
+
+function FlowStageCard({ data, selected }: NodeProps<Node<FlowStageData>>) {
+  const statusLabel = data.status === "done" ? "Préparé" : data.status === "active" ? "Prochaine étape" : "À venir";
+  return (
+    <div className={`flow-node flow-node-${data.status} ${selected ? "flow-node-selected" : ""}`}>
+      <Handle type="target" position={Position.Top} />
+      <div className="flow-node-number">{data.status === "done" ? <Check size={14} /> : data.step}</div>
+      <div className="flow-node-copy"><strong>{data.title}</strong><span>{data.description}</span></div>
+      <span className="flow-node-status">{statusLabel}</span>
+      <Handle type="source" position={Position.Bottom} />
+    </div>
+  );
+}
+
+const flowNodeTypes = { stage: FlowStageCard };
+
 function BrandMark({ size = 22 }: { size?: number }) {
   return (
     <svg aria-hidden="true" width={size} height={size} viewBox="0 0 48 48" fill="none">
@@ -97,7 +134,7 @@ function NavButton({ active, icon: Icon, label, onClick, badge }: {
 }
 
 function SectionHeading({ eyebrow, title, description, action }: {
-  eyebrow?: string; title: string; description?: string; action?: React.ReactNode;
+  eyebrow?: string; title: string; description?: string; action?: ReactNode;
 }) {
   return (
     <div className="section-heading">
@@ -139,6 +176,9 @@ export function IdealyStudio() {
   const [canvasTab, setCanvasTab] = useState<"Aperçu" | "Plan" | "Code" | "Données">("Aperçu");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showAgentPanel, setShowAgentPanel] = useState(true);
+  const [flowNodes, setFlowNodes, onFlowNodesChange] = useNodesState(initialFlowNodes);
+  const [flowEdges, setFlowEdges, onFlowEdgesChange] = useEdgesState(initialFlowEdges);
+  const onFlowConnect = useCallback((connection: Connection) => setFlowEdges((current) => addEdge(connection, current)), [setFlowEdges]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -149,6 +189,13 @@ export function IdealyStudio() {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
         setCommandOpen((open) => !open);
+      }
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "j") {
+        event.preventDefault();
+        setView("studio");
+        setInput("");
+        setProjectPrompt("");
+        setSelectedTemplate(null);
       }
       if (event.key === "Escape") {
         setCommandOpen(false);
@@ -331,7 +378,7 @@ export function IdealyStudio() {
                   <form className="prompt-composer" onSubmit={(event) => { event.preventDefault(); startProject(); }}>
                     <div className="composer-topline"><span className="composer-dot" /><span>Nouvelle mission</span><span className="composer-note">Commencez simplement</span></div>
                     <textarea value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); startProject(); } }} placeholder="J’aimerais créer une application qui aide les petites équipes à…" rows={3} aria-label="Décrivez votre idée" />
-                    <div className="composer-bottom"><div className="composer-tools"><button type="button" className="composer-tool" onClick={() => toast("Ajout de fichier", { description: "Les pièces jointes seront reliées au stockage du projet." })}><Paperclip size={16} /><span>Ajouter</span></button><button type="button" className="composer-tool" onClick={() => toast("Contexte du projet", { description: "Le contexte sera sauvegardé lorsque la persistance sera raccordée." })}><Layers size={16} /><span>Contexte</span></button><span className="composer-hint"><Keyboard size={13} /> Entrée pour envoyer</span></div><button type="submit" className="send-button" aria-label="Préparer le projet"><ArrowUp size={18} /><span>Commencer</span></button></div>
+                    <div className="composer-bottom"><div className="composer-tools"><button type="button" className="composer-tool" onClick={() => toast("Ajout de fichier", { description: "Les pièces jointes seront reliées au stockage du projet." })}><Paperclip size={16} /><span>Ajouter</span></button><button type="button" className="composer-tool" onClick={() => toast("Contexte du projet", { description: "Le contexte sera sauvegardé lorsque la persistance sera raccordée." })}><Layers size={16} /><span>Contexte</span></button><span className="composer-hint"><Keyboard size={13} /> Entrée pour envoyer</span></div><BaseButton type="submit" className="send-button" aria-label="Préparer le projet"><ArrowUp size={18} /><span>Commencer</span></BaseButton></div>
                   </form>
 
                   <div className="template-section">
@@ -369,14 +416,29 @@ export function IdealyStudio() {
                           <div className="preview-content"><div className="preview-nav"><span className="preview-logo"><BrandMark size={20} /> {projectTitle.split(" ").slice(0, 2).join(" ")}</span><div><span>Fonctionnalités</span><span>À propos</span><button onClick={() => toast("Aperçu uniquement", { description: "Les liens du site seront actifs lorsque le projet sera construit." })} type="button">Commencer <ArrowRight size={12} /></button></div></div><div className="preview-hero"><span className="preview-eyebrow"><Sparkles size={12} /> LE POINT DE DÉPART</span><h2>Les bonnes idées<br /><span>méritent de prendre forme.</span></h2><p>{projectPrompt || "Un espace clair pour transformer votre intention en une expérience utile, soignée et simple à utiliser."}</p><button type="button" onClick={() => toast("Ceci est une maquette", { description: "Le site réel sera construit par les agents une fois le moteur raccordé." })}>Découvrir le projet <ArrowRight size={14} /></button><div className="preview-orbit"><div className="preview-orbit-inner"><BrandMark size={54} /></div><span className="orbit-chip chip-one"><Sparkles size={13} /> Idée</span><span className="orbit-chip chip-two"><Layers size={13} /> Structure</span><span className="orbit-chip chip-three"><Check size={13} /> Clarté</span></div></div><div className="preview-bottom-cards"><div><Layers size={17} /><strong>Une base claire</strong><span>Une structure pensée pour évoluer.</span></div><div><Zap size={17} /><strong>Moins de friction</strong><span>Le bon chemin, étape par étape.</span></div><div><ShieldCheck size={17} /><strong>Vous gardez la main</strong><span>Chaque choix reste visible.</span></div></div></div>
                         </div>
                       ) : (
-                        <div className="plan-canvas"><div className="plan-canvas-heading"><div><span className="eyebrow">FLUX DU PROJET</span><h2>De l’idée à la livraison</h2></div><span className="plan-count">4 étapes</span></div><div className="flow-stack">
-                          {[
-                            { n: "01", title: "Définir le périmètre", desc: "Clarifier l’objectif et les utilisateurs.", icon: Compass, state: "done" },
-                            { n: "02", title: "Concevoir l’expérience", desc: "Organiser les écrans, composants et états.", icon: FileImage, state: "active" },
-                            { n: "03", title: "Construire la solution", desc: "Préparer l’interface et les comportements.", icon: Code2, state: "next" },
-                            { n: "04", title: "Vérifier la qualité", desc: "Accessibilité, responsive et cohérence.", icon: ShieldCheck, state: "next" },
-                          ].map((step, i) => <div key={step.n} className={`flow-step flow-step-${step.state}`}><div className="flow-connector" /> <div className="flow-step-number">{step.state === "done" ? <Check size={15} /> : step.n}</div><div className="flow-step-icon"><step.icon size={18} /></div><div className="flow-step-content"><strong>{step.title}</strong><span>{step.desc}</span></div><span className="flow-step-status">{step.state === "done" ? "Préparé" : step.state === "active" ? "Prochaine étape" : "À venir"}</span><button className="mini-icon" onClick={() => toast(step.title, { description: "Les actions de cette étape seront reliées à l’orchestrateur." })} type="button" aria-label={`Détails : ${step.title}`}><ChevronRight size={16} /></button></div>)}
-                        </div><div className="plan-footer-note"><Sparkles size={15} /><span>Cette trame est un aperçu UI. L’orchestrateur réel sera raccordé sans simuler son exécution.</span></div></div>
+                        <div className="plan-canvas plan-canvas-interactive">
+                          <div className="plan-canvas-heading"><div><span className="eyebrow">FLUX DU PROJET</span><h2>De l’idée à la livraison</h2></div><span className="plan-count">4 étapes · déplaçables</span></div>
+                          <div className="reactflow-wrapper">
+                            <ReactFlow
+                              nodes={flowNodes}
+                              edges={flowEdges}
+                              onNodesChange={onFlowNodesChange}
+                              onEdgesChange={onFlowEdgesChange}
+                              onConnect={onFlowConnect}
+                              nodeTypes={flowNodeTypes}
+                              fitView
+                              fitViewOptions={{ padding: 0.18 }}
+                              minZoom={0.35}
+                              maxZoom={1.4}
+                              proOptions={{ hideAttribution: true }}
+                            >
+                              <Background color="var(--line-strong)" gap={19} size={1} />
+                              <Controls position="bottom-right" />
+                              <MiniMap position="bottom-left" pannable zoomable maskColor="rgba(120,90,210,.08)" />
+                            </ReactFlow>
+                          </div>
+                          <div className="plan-footer-note"><Sparkles size={15} /><span>Déplacez les étapes et reliez les nœuds. Ce canvas est interactif ; l’orchestrateur réel n’est pas encore connecté.</span></div>
+                        </div>
                       )}
                     </section>
                     {showAgentPanel ? <aside className="agent-rail"><div className="agent-rail-header"><div><span className="eyebrow">ORCHESTRATION</span><h3>Équipe Idealy</h3></div><button className="mini-icon" onClick={() => navigate("agents")} type="button" aria-label="Voir l’équipe"><ArrowUpRight size={15} /></button></div><div className="agent-running-note"><span className="agent-pulse"><span /></span><div><strong>En attente de lancement</strong><span>Prête à recevoir votre mission</span></div></div><div className="agent-list">{agents.map((agent, i) => <button className="agent-mini-row" key={agent.name} onClick={() => navigate("agents")} type="button"><span className={`agent-avatar agent-${agent.color}`}>{agent.letter}</span><span className="agent-mini-meta"><strong>{agent.name}</strong><small>{agent.role}</small></span><span className="agent-idle">Repos</span></button>)}</div><div className="rail-divider" /><div className="rail-block-title"><span>CONTEXTE DU PROJET</span><button type="button" className="mini-icon" onClick={() => toast("Contexte", { description: "Les éléments de contexte seront conservés avec le projet." })}><Plus size={14} /></button></div><button className="context-entry" onClick={() => toast("Brief", { description: projectPrompt || "Aucun brief ajouté pour le moment." })} type="button"><FileText size={16} /><span><strong>Brief du projet</strong><small>{projectPrompt ? "1 élément de contexte" : "Aucun brief enregistré"}</small></span><ChevronRight size={14} /></button><button className="context-entry" onClick={() => navigate("connectors")} type="button"><GitBranch size={16} /><span><strong>Connecteurs</strong><small>{configuredConnectors.length} préparé(s)</small></span><ChevronRight size={14} /></button><div className="rail-bottom-tip"><Sparkles size={15} /><span>Les agents démarreront quand l’orchestration sera connectée.</span></div></aside> : null}
