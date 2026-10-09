@@ -631,7 +631,6 @@ export function IdealyStudio() {
                       },
                     ].map((plan, index) => {
                       const value = billingCycle === "yearly" ? plan.annual : plan.monthly;
-                      const numeric = typeof value === "number";
                       const monthlyEquivalent = plan.key === "pro" ? 15.9 : plan.key === "business" ? 40.9 : typeof value === "number" ? value : 0;
                       return (
                         <motion.article className={`pricing-card ${index === 1 ? "pricing-card-featured" : ""}`} key={plan.key} initial={{ opacity: 0, y: 9 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * .05 }}>
@@ -642,7 +641,7 @@ export function IdealyStudio() {
                           <h2>{plan.name}</h2>
                           <p>{plan.text}</p>
                           <div className="price-display">
-                            {numeric ? (
+                            {typeof value === "number" ? (
                               <>
                                 <div className="price-line"><strong>{billingCycle === "yearly" && plan.key !== "free" ? `${monthlyEquivalent.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €` : `${value.toLocaleString("fr-FR")} €`}</strong><span>/ mois</span></div>
                                 {plan.key === "free" ? <span className="price-billing-note">Offre gratuite</span> : billingCycle === "yearly" ? <span className="price-billing-note">Soit {(value as number).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} € facturés par an</span> : <span className="price-billing-note">Facturation mensuelle</span>}
