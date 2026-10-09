@@ -337,8 +337,8 @@ export function IdealyStudio() {
 
   const handleConnect = (name: string) => {
     setConfiguredConnectors((current) => current.includes(name) ? current : [...current, name]);
-    toast("Connecteur préparé", {
-      description: `${name} est marqué « prêt à configurer » dans cette maquette. Aucun compte externe n’a été lié.`,
+    toast("Raccordement préparé", {
+      description: `${name} est marqué localement pour le raccordement. Aucun compte externe n’a été lié.`,
     });
   };
 
@@ -695,7 +695,7 @@ export function IdealyStudio() {
               <button className="dialog-close icon-button" onClick={() => setSelectedConnector(null)} type="button" aria-label="Fermer"><X size={17} /></button>
               <div className="connector-dialog-brand" style={{ color: `#${selectedConnector.brand.hex}` }}><BrandIcon brand={selectedConnector.brand} size={34} /></div>
               <span className="eyebrow">CONNECTEUR / {connectorCategoryLabels[selectedConnector.category].toUpperCase()}</span>
-              <h2 id="connector-dialog-title">Configurer {selectedConnector.name}</h2>
+              <h2 id="connector-dialog-title">Fiche d’intégration : {selectedConnector.name}</h2>
               <p>{selectedConnector.description} L’accès est décrit par le catalogue de l’application d’origine. Dans cette nouvelle interface, aucun compte n’est connecté : les autorisations doivent passer par le backend existant.</p>
               <div className="connector-dialog-meta"><div><span>État dans le catalogue d’origine</span><strong>{selectedConnector.availability === "configured" ? "Configuré côté serveur" : "Planifié"}</strong></div><div><span>Mode d’accès</span><strong>{selectedConnector.auth}</strong></div></div><div className="connector-operation-list"><div className="connector-operation-heading">Opérations prévues</div>{selectedConnector.operations.map((operation) => <div key={operation}><Check size={14} /><span>{operation}</span></div>)}</div><div className="connector-dialog-checks"><div><LockKeyhole size={15} /><span>Connexion non active dans cette branche</span></div><div><ShieldCheck size={15} /><span>Secrets et autorisations restent côté serveur</span></div></div>
               <button className="primary-button full-width" onClick={() => { handleConnect(selectedConnector.name); setSelectedConnector(null); }} type="button">{configuredConnectors.includes(selectedConnector.name) ? "Confirmer la préparation locale" : "Préparer le raccordement"} <ArrowRight size={15} /></button>
