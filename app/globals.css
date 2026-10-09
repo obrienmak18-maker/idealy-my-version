@@ -850,3 +850,7 @@ kbd { display: inline-flex; align-items: center; justify-content: center; min-wi
   .connector-card-top { flex-wrap: wrap; }
   .catalog-status { margin-left: auto; }
 }
+
+@media (min-width: 721px) and (max-width: 900px) {
+  .filter-group { flex-wrap: wrap; }
+}
